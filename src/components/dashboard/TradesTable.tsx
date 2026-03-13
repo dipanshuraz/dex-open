@@ -3,7 +3,7 @@
 import { useTrades, Trade } from "@/hooks/useTrades";
 import { formatNumber } from "@/lib/utils";
 import { getExplorerUrl } from "@/lib/decodeSwap";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import { ExternalLink, Loader2 } from "lucide-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -123,6 +123,8 @@ export function TradesTable({
   const now = useNow();
   const explorer = getExplorerUrl(chainId);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
   // ── Infinite scroll: trigger loadMore when near bottom ──
   const onScroll = useCallback(() => {
@@ -139,17 +141,58 @@ export function TradesTable({
     return () => el.removeEventListener("scroll", onScroll);
   }, [onScroll]);
 
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 300);
+    return () => window.clearTimeout(id);
+  }, [search]);
+
+  const filteredTrades = useMemo(() => {
+    const q = debouncedSearch.trim().toLowerCase();
+    if (!q) return trades;
+    return trades.filter((t) => {
+      const fields: (string | number | null | undefined)[] = [
+        t.type,
+        t.trader,
+        t.txHash,
+        t.price,
+        t.total,
+        t.amount,
+      ];
+      return fields.some((value) => {
+        if (value === null || value === undefined) return false;
+        const s = String(value).toLowerCase();
+        return s.includes(q);
+      });
+    });
+  }, [trades, debouncedSearch]);
+
+  const hasTrades = trades.length > 0;
+  const visibleTrades = filteredTrades;
+  const hasVisibleTrades = visibleTrades.length > 0;
+
   return (
     <div className="flex flex-col h-full min-h-0 font-sans">
-      {/* Header row */}
-      <div className="grid grid-cols-7 items-center px-4 py-2 bg-gray-100 dark:bg-[#171821] border-b border-black/10 dark:border-[#221A30] text-[10px] uppercase font-extrabold text-[#8C82A2] tracking-widest sticky top-0 z-10 w-full shrink-0">
-        <div>Age</div>
-        <div>Type</div>
-        <div>Price</div>
-        <div>Total</div>
-        <div>Amount</div>
-        <div>Trader</div>
-        <div className="text-center">Tx</div>
+      {/* Header row + search */}
+      <div className="sticky top-0 z-10 w-full shrink-0 bg-gray-100/95 dark:bg-[#0f1017]/95 backdrop-blur border-b border-black/10 dark:border-[#221A30]">
+        <div className="grid grid-cols-7 items-center px-4 py-2 text-[10px] uppercase font-extrabold text-[#8C82A2] tracking-widest">
+          <div>Age</div>
+          <div>Type</div>
+          <div>Price</div>
+          <div>Total</div>
+          <div>Amount</div>
+          <div>Trader</div>
+          <div className="text-center">Tx</div>
+        </div>
+        <div className="px-3 pb-2">
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by trader, tx hash, type, or value…"
+            className="w-full rounded-md bg-black/[0.03] dark:bg-white/[0.03] border border-black/5 dark:border-white/[0.06] px-3 py-1.5 text-[11px] text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-purple-500/70 focus:border-purple-500/70 transition-colors"
+          />
+        </div>
       </div>
 
       {/* Body */}
@@ -170,7 +213,7 @@ export function TradesTable({
             <div className="w-5 h-5 border-2 border-purple-500/50 border-t-purple-400 rounded-full animate-spin" />
             Connecting to blockchain…
           </div>
-        ) : !error && trades.length === 0 ? (
+        ) : !error && !hasTrades ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-gray-500 text-xs text-center px-6">
             <span>No recent trades found for this token.</span>
             <span className="text-[10px] text-gray-600">
@@ -179,24 +222,35 @@ export function TradesTable({
           </div>
         ) : (
           <div className="flex flex-col pb-6">
-            {/* Virtualized rows */}
-            <VirtualizedTrades
-              trades={trades}
-              now={now}
-              explorer={explorer}
-              scrollElement={scrollRef.current}
-            />
+            {hasVisibleTrades ? (
+              <>
+                {/* Virtualized rows */}
+                <VirtualizedTrades
+                  trades={visibleTrades}
+                  now={now}
+                  explorer={explorer}
+                  scrollElement={scrollRef.current}
+                />
 
-            {/* Load more indicator */}
-            {loadingMore && (
-              <div className="flex items-center justify-center gap-2 py-4 text-[11px] text-gray-500">
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-400" />
-                Loading older trades…
-              </div>
-            )}
-            {!hasMore && trades.length > 0 && (
-              <div className="flex items-center justify-center py-3 text-[10px] text-gray-600 select-none">
-                — No more trades —
+                {/* Load more indicator */}
+                {loadingMore && (
+                  <div className="flex items-center justify-center gap-2 py-4 text-[11px] text-gray-500">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-400" />
+                    Loading older trades…
+                  </div>
+                )}
+                {!hasMore && trades.length > 0 && (
+                  <div className="flex items-center justify-center py-3 text-[10px] text-gray-600 select-none">
+                    — No more trades —
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-gray-500 text-xs text-center px-6">
+                <span>No trades match your search.</span>
+                <span className="text-[10px] text-gray-600">
+                  Try a different address, tx hash, type (BUY/SELL), or value.
+                </span>
               </div>
             )}
           </div>
