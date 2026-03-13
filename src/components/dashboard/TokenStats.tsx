@@ -9,12 +9,12 @@ import { useTokenProfile } from "@/hooks/useTokenProfile";
 
 function InfoCard({ icon: Icon, value, label, valueColor = "text-black dark:text-white" }: any) {
   return (
-    <div className="flex flex-col items-center justify-center p-3 border border-black/10 dark:border-[#221A30] bg-gray-50 dark:bg-[#120B20] rounded gap-1.5 hover:bg-gray-100 dark:hover:bg-[#1A112C] transition-colors cursor-default">
+    <div className="flex flex-col items-center justify-center p-3 border border-black/10 dark:border-[#221A30] bg-white dark:bg-[#120B20] rounded gap-1.5 hover:bg-gray-50 dark:hover:bg-[#1A112C] transition-colors cursor-default">
       <div className={`flex items-center gap-1.5 font-bold ${valueColor} text-sm`}>
         <Icon className="w-4 h-4" />
         <span>{value}</span>
       </div>
-      <span className="text-[9px] uppercase font-bold text-gray-400 dark:text-[#8C82A2] tracking-wide">{label}</span>
+      <span className="text-[9px] uppercase font-bold text-gray-500 dark:text-[#8C82A2] tracking-wide">{label}</span>
     </div>
   );
 }
@@ -59,25 +59,25 @@ export function TokenStats({
 
       {/* Grid 2-col */}
       <div className="grid grid-cols-2 gap-2 mt-2">
-         <div className="flex flex-col items-center justify-center p-3 border border-black/10 dark:border-[#221A30] bg-gray-50 dark:bg-[#120B20] rounded gap-1.5 hover:bg-gray-100 dark:hover:bg-[#1A112C] transition-colors">
+         <div className="flex flex-col items-center justify-center p-3 border border-black/10 dark:border-[#221A30] bg-white dark:bg-[#120B20] rounded gap-1.5 hover:bg-gray-50 dark:hover:bg-[#1A112C] transition-colors">
             <div className="flex items-center gap-1.5 font-bold text-black dark:text-white text-sm">
                <Users className="w-4 h-4" />
                <span>77,447</span>
             </div>
-            <span className="text-[9px] uppercase font-bold text-gray-400 dark:text-[#8C82A2] tracking-wide">HOLDERS</span>
+            <span className="text-[9px] uppercase font-bold text-gray-500 dark:text-[#8C82A2] tracking-wide">HOLDERS</span>
          </div>
-         <div className="flex flex-col items-center justify-center p-3 border border-black/10 dark:border-[#221A30] bg-gray-50 dark:bg-[#120B20] rounded gap-1.5 hover:bg-gray-100 dark:hover:bg-[#1A112C] transition-colors">
+         <div className="flex flex-col items-center justify-center p-3 border border-black/10 dark:border-[#221A30] bg-white dark:bg-[#120B20] rounded gap-1.5 hover:bg-gray-50 dark:hover:bg-[#1A112C] transition-colors">
             <div className="flex items-center gap-1.5 font-bold text-black dark:text-white text-sm">
                <Flame className="w-4 h-4 text-gray-300 dark:text-gray-400" />
                <span>-</span>
             </div>
-            <span className="text-[9px] uppercase font-bold text-gray-400 dark:text-[#8C82A2] tracking-wide">LP BURNED</span>
+            <span className="text-[9px] uppercase font-bold text-gray-500 dark:text-[#8C82A2] tracking-wide">LP BURNED</span>
          </div>
       </div>
 
       {/* Contract Address */}
-      <div className="flex items-center justify-between p-3 border border-black/10 dark:border-[#221A30] bg-transparent rounded mt-2 hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer group">
-         <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300 font-bold text-[11px] font-mono">
+      <div className="flex items-center justify-between p-3 border border-black/10 dark:border-[#221A30] bg-white dark:bg-transparent rounded mt-2 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer group">
+         <div className="flex items-center gap-2 text-gray-800 dark:text-gray-300 font-bold text-[11px] font-mono">
             <FileText className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-400" />
             <span>CA: {truncateAddress(tokenAddress)}</span>
          </div>
@@ -85,15 +85,15 @@ export function TokenStats({
       </div>
 
       {profile && (
-        <div className="mt-3 p-3 border border-black/10 dark:border-[#221A30] rounded bg-gray-50 dark:bg-[#120B20] flex flex-col gap-1.5">
-          <div className="flex items-center justify-between text-[11px] text-gray-600 dark:text-gray-300">
+        <div className="mt-3 p-3 border border-black/10 dark:border-[#221A30] rounded bg-white dark:bg-[#120B20] flex flex-col gap-1.5">
+          <div className="flex items-center justify-between text-[11px] text-gray-800 dark:text-gray-300">
             <span className="font-semibold">Profile</span>
             {profile.links?.[0]?.url && (
               <a
                 href={profile.links[0].url}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-1 text-[10px] text-purple-400 hover:text-purple-300"
+                className="flex items-center gap-1 text-[10px] text-purple-600 dark:text-purple-400 hover:text-purple-500 dark:hover:text-purple-300"
               >
                 Website <ExternalLink className="w-3 h-3" />
               </a>

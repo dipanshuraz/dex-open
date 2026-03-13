@@ -105,7 +105,7 @@ export function PoolsTable({
       <div className="grid grid-cols-6 items-center px-4 py-3 bg-gray-50 dark:bg-[#171821] border-b border-black/10 dark:border-[#221A30] text-[10px] uppercase font-extrabold text-[#8C82A2] tracking-widest sticky top-0 z-10 w-full shrink-0 gap-x-2">
         <div className="truncate w-full text-left">Pool / Dex</div>
         <div className="truncate w-full text-left">Pair</div>
-        <div className="truncate w-full text-left">Liquidity</div>
+        <div className="truncate w-full text-left flex items-center gap-1">Liquidity <span className="text-[#A78BFA]">▼</span></div>
         <div className="truncate w-full text-left">Volume (24h)</div>
         <div className="truncate w-full text-left">Age</div>
         <div className="truncate text-left">Action</div>

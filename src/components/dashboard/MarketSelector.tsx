@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMarkets, MarketOption } from "@/hooks/useMarkets";
 import { formatNumber } from "@/lib/utils";
 import { ChevronDown, Zap, CheckCircle2, Search } from "lucide-react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 interface Props {
   chainId: string;
@@ -12,7 +13,18 @@ interface Props {
 }
 
 export function MarketSelector({ chainId, tokenAddress, onPoolSelect }: Props) {
-  const { markets, selected, setSelected, loading, error } = useMarkets(chainId, tokenAddress);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Read ?pool= from the URL on initial render (e.g. ?pool=uniswap)
+  const initialDexId = searchParams.get("pool") ?? undefined;
+
+  const { markets, selected, setSelected, loading, error } = useMarkets(
+    chainId,
+    tokenAddress,
+    initialDexId,
+  );
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const ref = useRef<HTMLDivElement>(null);
@@ -39,6 +51,16 @@ export function MarketSelector({ chainId, tokenAddress, onPoolSelect }: Props) {
   useEffect(() => {
     if (selected) onPoolSelect?.(selected.pairAddress);
   }, [selected, onPoolSelect]);
+
+  function handleSelect(m: MarketOption) {
+    setSelected(m);
+    setOpen(false);
+
+    // Keep URL in sync so any pool selection becomes a shareable link
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("pool", m.dexId);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }
 
   const filtered = markets.filter((m) =>
     m.label.toLowerCase().includes(search.toLowerCase())
@@ -108,7 +130,7 @@ export function MarketSelector({ chainId, tokenAddress, onPoolSelect }: Props) {
               filtered.map((m) => (
                 <button
                   key={m.id}
-                  onClick={() => { setSelected(m); setOpen(false); }}
+                  onClick={() => handleSelect(m)}
                   className={`w-full flex items-center justify-between px-3 py-2.5 hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-left gap-2 ${
                     m.id === selected.id ? "bg-purple-500/5" : ""
                   }`}

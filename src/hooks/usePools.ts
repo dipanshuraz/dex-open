@@ -28,7 +28,8 @@ export function usePools(chain: string, tokenAddress: string) {
         const json = await res.json();
         
         if (mounted && Array.isArray(json)) {
-          setData(json);
+          const sorted = [...json].sort((a, b) => (b.liquidity ?? 0) - (a.liquidity ?? 0));
+          setData(sorted);
         }
       } catch (err) {
         console.error("Failed to load pools", err);

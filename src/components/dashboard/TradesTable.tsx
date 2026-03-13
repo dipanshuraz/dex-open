@@ -8,6 +8,19 @@ import { motion } from "framer-motion";
 import { ExternalLink, Loader2 } from "lucide-react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
+// ── Mobile breakpoint ──
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return isMobile;
+}
+
 // ── Live clock ──
 function useNow() {
   const [now, setNow] = useState(() => Date.now());
@@ -32,7 +45,72 @@ function ageStr(now: number, ts: number) {
   return `${Math.floor(s / 86400)}d`;
 }
 
-// ── Single row ──
+// ── Compact mobile row ──
+function CompactTradeRow({
+  trade,
+  now,
+  explorer,
+}: {
+  trade: Trade;
+  now: number;
+  explorer: string;
+}) {
+  const isBuy = trade.type === "BUY";
+  const accent = isBuy ? "#26a69a" : "#ef5350";
+  const bgFlash = trade.isNew
+    ? isBuy
+      ? "bg-[#26a69a]/10"
+      : "bg-[#ef5350]/10"
+    : "";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+      className={`flex items-center justify-between px-3 py-2 border-b border-black/[0.05] dark:border-white/[0.04] transition-colors duration-700 ${bgFlash}`}
+    >
+      {/* Left: type badge + total */}
+      <div className="flex items-center gap-2 min-w-0">
+        <span
+          className="shrink-0 text-[10px] font-extrabold tracking-wider px-1.5 py-0.5 rounded"
+          style={{
+            color: accent,
+            background: `${accent}22`,
+          }}
+        >
+          {trade.isNew && (
+            <span
+              className="inline-block w-1 h-1 rounded-full mr-1 animate-ping align-middle"
+              style={{ background: accent }}
+            />
+          )}
+          {trade.type}
+          {trade.isWhale ? " 🐋" : ""}
+        </span>
+        <span className="text-[12px] font-semibold font-mono truncate" style={{ color: accent }}>
+          ${formatNumber(trade.total)}
+        </span>
+      </div>
+
+      {/* Right: price · age · tx link */}
+      <div className="flex items-center gap-3 shrink-0 text-[11px] font-mono">
+        <span className="text-gray-400">${formatNumber(trade.price)}</span>
+        <span className="text-gray-500">{ageStr(now, trade.timestamp)}</span>
+        <a
+          href={`${explorer}/tx/${trade.txHash}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-gray-500 hover:text-purple-400 transition-colors"
+        >
+          <ExternalLink className="w-3 h-3" />
+        </a>
+      </div>
+    </motion.div>
+  );
+}
+
+// ── Desktop single row ──
 function TradeRow({
   trade,
   now,

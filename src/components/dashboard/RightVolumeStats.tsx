@@ -20,9 +20,9 @@ export function RightVolumeStats({ chainId, pairAddress }: { chainId: string; pa
 
   return (
     <div className="flex flex-col font-sans px-4 pt-4 pb-0 border-b border-black/10 dark:border-[#221A30]">
-      <div className="flex items-center justify-between text-[11px] font-bold text-gray-500 dark:text-gray-400 tracking-wider">
+      <div className="flex items-center justify-between text-[11px] font-bold text-gray-800 dark:text-gray-400 tracking-wider">
         <div className="flex flex-col gap-1">
-          <span className="uppercase whitespace-nowrap">Volume 24h</span>
+          <span className="uppercase whitespace-nowrap text-gray-500 dark:text-gray-400">Volume 24h</span>
           <span className="text-black dark:text-white text-sm">
             {loading ? "--" : `$${formatNumber(vol24h)}`}
           </span>

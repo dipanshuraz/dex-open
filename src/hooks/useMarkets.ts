@@ -20,7 +20,11 @@ interface UseMarketsResult {
   error: string | null;
 }
 
-export function useMarkets(chainId: string, tokenAddress: string): UseMarketsResult {
+export function useMarkets(
+  chainId: string,
+  tokenAddress: string,
+  initialDexId?: string,
+): UseMarketsResult {
   const [markets, setMarkets] = useState<MarketOption[]>([]);
   const [selected, setSelected] = useState<MarketOption | undefined>();
   const [loading, setLoading] = useState(true);
@@ -61,7 +65,14 @@ export function useMarkets(chainId: string, tokenAddress: string): UseMarketsRes
 
         if (!isMounted) return;
         setMarkets(options);
-        setSelected(options[0]);
+
+        // Pre-select pool matching initialDexId (case-insensitive prefix match),
+        // falling back to the highest-liquidity pool.
+        const needle = initialDexId?.toLowerCase();
+        const initial = needle
+          ? options.find((o) => o.dexId.toLowerCase().startsWith(needle)) ?? options[0]
+          : options[0];
+        setSelected(initial);
         setError(null);
       } catch (err: any) {
         console.error("useMarkets error:", err);
@@ -77,7 +88,7 @@ export function useMarkets(chainId: string, tokenAddress: string): UseMarketsRes
     return () => {
       isMounted = false;
     };
-  }, [chainId, tokenAddress]);
+  }, [chainId, tokenAddress, initialDexId]);
 
   return { markets, selected, setSelected, loading, error };
 }

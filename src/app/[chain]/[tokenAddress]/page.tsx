@@ -48,7 +48,7 @@ export default function TokenPage({ params }: Props) {
       {/* Main Grid Layout */}
       <main className="relative z-10 flex-1 flex overflow-hidden">
         {/* Left Content Area (Chart + Trading Feed) */}
-        <div className="flex-1 flex flex-col min-w-0 p-2 gap-2 overflow-hidden">
+        <div className="flex-1 flex flex-col min-w-0 p-2 gap-2 overflow-hidden bg-white dark:bg-black">
           {/* Candlestick Chart - fixed viewport height */}
           <div className="h-[40vh] w-full relative min-h-[220px]">
             <TradingChart chainId={chain} tokenAddress={tokenAddress} />
@@ -65,10 +65,14 @@ export default function TokenPage({ params }: Props) {
         </div>
 
         {/* Right Sidebar */}
-        <div className="w-[340px] border-l border-white/5 bg-[#0C0814]/90 backdrop-blur flex flex-col overflow-y-auto overflow-x-hidden p-0 custom-scrollbar">
-          <RightVolumeStats chainId={chain} pairAddress={selectedPairAddress} />
-          <TradingControls />
-          <TokenStats chainId={chain} tokenAddress={tokenAddress} />
+        <div className="w-[340px] border-l border-black/10 dark:border-white/5 bg-white dark:bg-[#0C0814]/90 backdrop-blur flex flex-col h-full overflow-hidden p-0">
+          <div className="shrink-0 flex flex-col">
+            <RightVolumeStats chainId={chain} pairAddress={selectedPairAddress} />
+            <TradingControls />
+          </div>
+          <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
+            <TokenStats chainId={chain} tokenAddress={tokenAddress} />
+          </div>
         </div>
       </main>
     </div>
