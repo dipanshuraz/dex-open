@@ -4,8 +4,9 @@ import { useTrades, Trade } from "@/hooks/useTrades";
 import { formatNumber } from "@/lib/utils";
 import { getExplorerUrl } from "@/lib/decodeSwap";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { ExternalLink, Loader2 } from "lucide-react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 // ── Live clock ──
 function useNow() {
@@ -121,7 +122,7 @@ export function TradesTable({
   );
   const now = useNow();
   const explorer = getExplorerUrl(chainId);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
   // ── Infinite scroll: trigger loadMore when near bottom ──
   const onScroll = useCallback(() => {
@@ -178,11 +179,13 @@ export function TradesTable({
           </div>
         ) : (
           <div className="flex flex-col pb-6">
-            <AnimatePresence initial={false}>
-              {trades.map((trade) => (
-                <TradeRow key={trade.id} trade={trade} now={now} explorer={explorer} />
-              ))}
-            </AnimatePresence>
+            {/* Virtualized rows */}
+            <VirtualizedTrades
+              trades={trades}
+              now={now}
+              explorer={explorer}
+              scrollElement={scrollRef.current}
+            />
 
             {/* Load more indicator */}
             {loadingMore && (
@@ -199,6 +202,57 @@ export function TradesTable({
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function VirtualizedTrades({
+  trades,
+  now,
+  explorer,
+  scrollElement,
+}: {
+  trades: Trade[];
+  now: number;
+  explorer: string;
+  scrollElement: HTMLDivElement | null;
+}) {
+  const rowVirtualizer = useVirtualizer({
+    count: trades.length,
+    getScrollElement: () => scrollElement,
+    estimateSize: () => 32,
+    overscan: 10,
+  });
+
+  const virtualItems = rowVirtualizer.getVirtualItems();
+
+  return (
+    <div
+      style={{
+        height: rowVirtualizer.getTotalSize(),
+        position: "relative",
+        width: "100%",
+      }}
+    >
+      {virtualItems.map((virtualRow) => {
+        const trade = trades[virtualRow.index];
+        if (!trade) return null;
+
+        return (
+          <div
+            key={trade.id}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              transform: `translateY(${virtualRow.start}px)`,
+            }}
+          >
+            <TradeRow trade={trade} now={now} explorer={explorer} />
+          </div>
+        );
+      })}
     </div>
   );
 }
