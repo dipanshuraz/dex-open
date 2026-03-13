@@ -90,18 +90,19 @@ export function TradingChart({ chainId, tokenAddress }: { chainId: string; token
     const isLight = resolvedTheme === "light";
     const chart = createChart(chartContainerRef.current, {
       layout: {
-        background: { type: ColorType.Solid, color: isLight ? "#ffffff" : "#0D0E12" },
-        textColor: isLight ? "#333333" : "#8A8D9B",
+        // Dark theme colors tuned to resemble TradingView-style purple night mode
+        background: { type: ColorType.Solid, color: isLight ? "#ffffff" : "#09001A" },
+        textColor: isLight ? "#333333" : "#A3B1D1",
         fontSize: 11,
         fontFamily: "'Inter', sans-serif",
       },
       grid: {
-        vertLines: { color: isLight ? "rgba(0,0,0,0.04)" : "rgba(138,141,155,0.05)" },
-        horzLines: { color: isLight ? "rgba(0,0,0,0.04)" : "rgba(138,141,155,0.05)" },
+        vertLines: { color: isLight ? "rgba(0,0,0,0.04)" : "rgba(95, 106, 164, 0.25)" },
+        horzLines: { color: isLight ? "rgba(0,0,0,0.04)" : "rgba(95, 106, 164, 0.25)" },
       },
       crosshair: {
-        vertLine: { color: "#5F6472", width: 1, style: 2, labelVisible: true },
-        horzLine: { color: "#5F6472", width: 1, style: 2, labelVisible: true },
+        vertLine: { color: isLight ? "#5F6472" : "#9F7AEA", width: 1, style: 2, labelVisible: true },
+        horzLine: { color: isLight ? "#5F6472" : "#9F7AEA", width: 1, style: 2, labelVisible: true },
       },
       width: chartContainerRef.current.clientWidth,
       height: chartContainerRef.current.clientHeight,
@@ -109,26 +110,27 @@ export function TradingChart({ chainId, tokenAddress }: { chainId: string; token
         timeVisible: true,
         secondsVisible: false,
         tickMarkFormatter,
-        borderColor: isLight ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.05)",
+        borderColor: isLight ? "rgba(0,0,0,0.1)" : "rgba(148, 163, 253, 0.35)",
         barSpacing: 12,
         minBarSpacing: 4,
       },
       rightPriceScale: {
-        borderColor: isLight ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.05)",
+        borderColor: isLight ? "rgba(0,0,0,0.1)" : "rgba(148, 163, 253, 0.35)",
         scaleMargins: { top: 0.15, bottom: 0.15 },
         autoScale: true,
       },
     });
 
     const candleSeries = chart.addSeries(CandlestickSeries, {
-      upColor: "#089981",
-      downColor: "#f23645",
+      // Candle palette loosely matched to screenshot
+      upColor: "#00C46A",
+      downColor: "#FF4B5C",
       borderVisible: true,
       wickVisible: true,
-      wickUpColor: "#089981",
-      wickDownColor: "#f23645",
-      borderUpColor: "#089981",
-      borderDownColor: "#f23645",
+      wickUpColor: "#00E387",
+      wickDownColor: "#FF6473",
+      borderUpColor: "#00E387",
+      borderDownColor: "#FF6473",
       priceFormat: { type: "price", precision: 6, minMove: 0.000001 },
     });
 
@@ -170,15 +172,15 @@ export function TradingChart({ chainId, tokenAddress }: { chainId: string; token
     const isLight = resolvedTheme === "light";
     chartRef.current.applyOptions({
       layout: {
-        textColor: isLight ? "#333333" : "#8A8D9B",
-        background: { type: ColorType.Solid, color: isLight ? "#ffffff" : "#0D0E12" },
+        textColor: isLight ? "#333333" : "#A3B1D1",
+        background: { type: ColorType.Solid, color: isLight ? "#ffffff" : "#09001A" },
       },
       grid: {
-        vertLines: { color: isLight ? "rgba(0,0,0,0.04)" : "rgba(138,141,155,0.05)" },
-        horzLines: { color: isLight ? "rgba(0,0,0,0.04)" : "rgba(138,141,155,0.05)" },
+        vertLines: { color: isLight ? "rgba(0,0,0,0.04)" : "rgba(95, 106, 164, 0.25)" },
+        horzLines: { color: isLight ? "rgba(0,0,0,0.04)" : "rgba(95, 106, 164, 0.25)" },
       },
-      timeScale: { borderColor: isLight ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.05)" },
-      rightPriceScale: { borderColor: isLight ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.05)" },
+      timeScale: { borderColor: isLight ? "rgba(0,0,0,0.1)" : "rgba(148, 163, 253, 0.35)" },
+      rightPriceScale: { borderColor: isLight ? "rgba(0,0,0,0.1)" : "rgba(148, 163, 253, 0.35)" },
     });
   }, [resolvedTheme]);
 
@@ -207,10 +209,10 @@ export function TradingChart({ chainId, tokenAddress }: { chainId: string; token
   const activeLabel = PERIODS.find(p => p.days === activePeriod)?.label ?? "1W";
 
   return (
-    <div className="w-full h-full relative rounded-lg overflow-hidden border border-black/10 dark:border-white/5 bg-white dark:bg-[#0D0E12] font-sans flex flex-col">
+    <div className="w-full h-full relative rounded-lg overflow-hidden border border-black/10 dark:border-white/5 bg-white dark:bg-[#09001A] font-sans flex flex-col">
       
       {/* ── Toolbar ── */}
-      <div className="flex items-center h-10 px-4 gap-1 border-b border-black/10 dark:border-white/[0.06] bg-white dark:bg-[#0D0E12] z-10 shrink-0">
+      <div className="flex items-center h-10 px-4 gap-1 border-b border-black/10 dark:border-white/[0.06] bg-white dark:bg-[#09001A] z-10 shrink-0">
 
         {/* OHLC summary */}
         {pricing && (
@@ -273,7 +275,7 @@ export function TradingChart({ chainId, tokenAddress }: { chainId: string; token
       </div>
 
       {/* ── Left sidebar tools (decorative) ── */}
-      <div className="absolute top-10 left-0 w-10 bottom-0 border-r border-black/10 dark:border-white/5 flex flex-col items-center py-4 gap-4 text-gray-400 z-10 bg-white/80 dark:bg-[#0B0C10]/80 backdrop-blur">
+      <div className="absolute top-10 left-0 w-10 bottom-0 border-r border-black/10 dark:border-white/5 flex flex-col items-center py-4 gap-4 text-gray-400 z-10 bg-white/80 dark:bg-[#09001A]/80 backdrop-blur">
         <div className="w-5 h-5 border border-current rounded flex items-center justify-center hover:text-black dark:hover:text-white cursor-pointer text-xs">+</div>
         <div className="w-5 h-5 border border-current rounded-full hover:text-black dark:hover:text-white cursor-pointer" />
         <div className="w-5 h-px bg-current hover:bg-black dark:hover:bg-white cursor-pointer mt-4" />

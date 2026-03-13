@@ -5,6 +5,9 @@ import { formatNumber } from "@/lib/utils";
 import { getDexIcon } from "@/lib/theme";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { CopyIcon } from "@/components/icons/CopyIcon";
+import { ExternalLink } from "lucide-react";
+import { TableEmptyState } from "./TableEmptyState";
 
 function useNow() {
   const [now, setNow] = useState(Date.now());
@@ -15,7 +18,7 @@ function useNow() {
   return now;
 }
 
-function PoolRow({ pool, now }: { pool: Pool, now: number }) {
+function PoolRow({ pool, now }: { pool: Pool; now: number }) {
   const seconds = Math.floor((now - pool.age) / 1000);
   let ageStr;
   
@@ -43,46 +46,76 @@ function PoolRow({ pool, now }: { pool: Pool, now: number }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="grid grid-cols-6 items-center px-4 py-2 hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-b border-black/5 dark:border-white/2 text-[11px] font-mono group overflow-hidden gap-x-2 w-full max-w-full"
+      className="grid grid-cols-7 items-center px-4 py-2.5 hover:bg-genius-blue/40 transition-colors border-b border-genius-blue text-sm leading-5 font-medium font-sans text-genius-cream overflow-hidden gap-x-3 w-full max-w-full"
     >
-      <div className="flex items-center gap-2 truncate w-full text-left font-sans font-medium text-gray-800 dark:text-gray-200">
+      {/* Pool / Dex */}
+      <div className="flex items-center gap-2 truncate w-full text-left">
         <span className="text-lg">{dexIcon}</span>
         <span>{dexName}</span>
-        <button 
-           onClick={() => navigator.clipboard.writeText(pool.pairAddress)}
-           className="opacity-0 group-hover:opacity-100 transition-opacity ml-1 text-gray-400 hover:text-gray-900 dark:hover:text-white"
-           title="Copy Address"
+        <button
+          type="button"
+          onClick={() => navigator.clipboard.writeText(pool.pairAddress)}
+          className="ml-1 text-genius-cream/50 hover:text-genius-cream transition-colors"
+          title="Copy pool address"
         >
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+          <CopyIcon className="w-3 h-3" />
         </button>
+        <a
+          href={pool.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-genius-cream/50 hover:text-genius-cream transition-colors"
+          aria-label="Open pool in explorer"
+        >
+          <ExternalLink className="w-3 h-3" strokeWidth={2} />
+        </a>
       </div>
 
-      <div className="font-bold tracking-wide truncate w-full text-left text-gray-800 dark:text-white">
-        {pool.pair}
+      {/* Pair */}
+      <div className="flex items-center gap-2 truncate w-full text-left">
+        <span>{pool.pair}</span>
+        <button
+          type="button"
+          onClick={() => navigator.clipboard.writeText(pool.pairAddress)}
+          className="text-genius-cream/50 hover:text-genius-cream transition-colors"
+          title="Copy pair address"
+        >
+          <CopyIcon className="w-3 h-3" />
+        </button>
+        <a
+          href={pool.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-genius-cream/50 hover:text-genius-cream transition-colors"
+          aria-label="Open pair in explorer"
+        >
+          <ExternalLink className="w-3 h-3" strokeWidth={2} />
+        </a>
       </div>
 
-      <div className="text-gray-600 dark:text-gray-300 truncate w-full text-left">
-        ${formatNumber(pool.liquidity)}
+      {/* Price / Mark Price Diff – static placeholder */}
+      <div className="truncate w-full text-left text-genius-cream/60">
+        Coming Soon
       </div>
 
-      <div className="text-gray-600 dark:text-gray-300 truncate w-full text-left">
+      {/* Backing Asset Liquidity */}
+      <div className="truncate w-full text-left">
+        {formatNumber(pool.liquidity)}
+      </div>
+
+      {/* Volume (24h) */}
+      <div className="truncate w-full text-left">
         ${formatNumber(pool.volume)}
       </div>
 
-      <div className="text-gray-500 dark:text-gray-400 truncate w-full text-left">
+      {/* Age */}
+      <div className="truncate w-full text-left text-genius-cream/70">
         {ageStr}
       </div>
 
-      <div className="truncate text-left flex items-center">
-        <a 
-          href={pool.url} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="text-blue-500 hover:text-blue-400 flex items-center gap-1 transition-colors"
-        >
-          View Pool
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-        </a>
+      {/* Buy / Sell – static placeholder */}
+      <div className="truncate w-full text-left text-genius-cream/60">
+        Coming Soon
       </div>
     </motion.div>
   );
@@ -99,24 +132,26 @@ export function PoolsTable({
   const now = useNow();
 
   return (
-    <div className="absolute inset-0 flex flex-col font-sans">
-      
+    <div className="absolute inset-0 flex flex-col font-sans bg-genius-indigo text-genius-cream">
       {/* Table Header */}
-      <div className="grid grid-cols-6 items-center px-4 py-3 bg-gray-50 dark:bg-[#171821] border-b border-black/10 dark:border-[#221A30] text-[10px] uppercase font-extrabold text-[#8C82A2] tracking-widest sticky top-0 z-10 w-full shrink-0 gap-x-2">
-        <div className="truncate w-full text-left">Pool / Dex</div>
+      <div className="grid grid-cols-7 items-center px-4 py-2.5 bg-genius-indigo border-b border-genius-blue text-sm leading-5 font-medium text-genius-cream/80 sticky top-0 z-10 w-full shrink-0 gap-x-3">
+        <div className="truncate w-full text-left">Pool</div>
         <div className="truncate w-full text-left">Pair</div>
-        <div className="truncate w-full text-left flex items-center gap-1">Liquidity <span className="text-[#A78BFA]">▼</span></div>
+        <div className="truncate w-full text-left">Price/Mark Price Diff</div>
+        <div className="truncate w-full text-left">Backing Asset Liquidity</div>
         <div className="truncate w-full text-left">Volume (24h)</div>
         <div className="truncate w-full text-left">Age</div>
-        <div className="truncate text-left">Action</div>
+        <div className="truncate w-full text-left">Buy / Sell</div>
       </div>
 
       {/* Table Body */}
       <div className="flex-1 overflow-y-auto custom-scrollbar relative">
         {loading && pools.length === 0 ? (
-          <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-xs">Loading pools...</div>
+          <div className="absolute inset-0 flex items-center justify-center text-genius-cream/60 text-xs">
+            Loading pools...
+          </div>
         ) : pools.length === 0 ? (
-          <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-xs">No pools found</div>
+          <TableEmptyState />
         ) : (
           <div className="flex flex-col">
             <AnimatePresence initial={false}>

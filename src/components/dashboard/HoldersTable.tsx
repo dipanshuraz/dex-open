@@ -3,6 +3,7 @@
 import { useHolders, Holder } from "@/hooks/useHolders";
 import { formatCurrency, formatNumber, truncateAddress } from "@/lib/utils";
 import { useCallback } from "react";
+import { TableEmptyState } from "./TableEmptyState";
 
 export function HoldersTable({
   chainId,
@@ -27,8 +28,8 @@ export function HoldersTable({
   };
 
   return (
-    <div className="w-full flex-1 flex flex-col font-sans h-full bg-white dark:bg-[#0B0C10]">
-      <div className="grid grid-cols-[1fr_2fr_1fr_minmax(200px,2fr)_1fr] items-center px-4 py-2 bg-gray-50/80 dark:bg-[#171821]/50 border-b border-black/10 dark:border-white/5 text-[10px] uppercase font-bold text-gray-500 tracking-wider">
+    <div className="w-full flex-1 flex flex-col font-sans h-full bg-genius-indigo text-genius-cream">
+      <div className="grid grid-cols-[1.2fr_3fr_1fr_minmax(200px,2.2fr)_1fr] items-center px-4 py-2.5 bg-genius-indigo border-b border-genius-blue text-sm leading-5 font-medium text-genius-cream/80">
         <div>Holders</div>
         <div />
         <div className="text-right">%</div>
@@ -48,65 +49,80 @@ export function HoldersTable({
           </div>
         )}
 
-        {!loading && holders.length === 0 && (
-          <div className="p-8 text-center text-xs text-gray-500">
-            No holder data available or token not yet indexed.
-          </div>
-        )}
+        {!loading && holders.length === 0 && <TableEmptyState />}
 
         <div className="flex flex-col">
-          {holders.map((holder: Holder) => (
-            <div
-              key={holder.address}
-              className="grid grid-cols-[1fr_2fr_1fr_minmax(200px,2fr)_1fr] items-center gap-2 px-4 py-2 hover:bg-black/5 dark:hover:bg-white/5 transition-colors border-b border-black/5 dark:border-white/[0.02] text-[11px] font-mono text-gray-800 dark:text-gray-200"
-            >
-              <div className="flex items-center gap-1">
-                <span className={getRankColor(holder.rank)}>#{holder.rank}</span>
-              </div>
+          {holders.map((holder: Holder) => {
+            const percent = holder.percentage ?? 0;
+            const clamped = Math.min(Math.max(percent, 0), 100);
+            const filledSegments = Math.round((clamped / 100) * 40); // 40 tiny bars
 
-              <button
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => handleCopy(holder.address)}
-                className="flex items-center gap-1 min-w-[120px] text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 cursor-pointer truncate mr-2"
+            return (
+              <div
+                key={holder.address}
+                className="grid grid-cols-[1.2fr_3fr_1fr_minmax(200px,2.2fr)_1fr] items-center gap-3 px-4 py-2.5 hover:bg-genius-blue/40 transition-colors border-b border-genius-blue text-sm leading-5 font-medium"
               >
-                <span>{truncateAddress(holder.address)}</span>
-                <span className="text-[9px] text-gray-500 border border-gray-400 dark:border-gray-600/80 rounded px-1 py-0.5">
-                  copy
-                </span>
-              </button>
+                {/* Rank */}
+                <div className="flex items-center gap-1">
+                  <span className={getRankColor(holder.rank)}>#{holder.rank}</span>
+                </div>
 
-              <div className="text-right font-bold text-yellow-600 dark:text-yellow-500/90">
-                {holder.percentage !== null
-                  ? `${holder.percentage.toFixed(2)}%`
-                  : "—"}
-              </div>
+                {/* Address with copy pill */}
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => handleCopy(holder.address)}
+                  className="flex items-center gap-1 min-w-[140px] text-genius-cream hover:text-genius-cream/80 cursor-pointer truncate mr-2"
+                >
+                  <span>{truncateAddress(holder.address)}</span>
+                  <span className="text-[9px] text-genius-cream/70 border border-genius-blue rounded px-1 py-0.5">
+                    copy
+                  </span>
+                </button>
 
-              <div className="flex items-center gap-2">
-                <div className="flex-1 h-2 rounded-full bg-gradient-to-r from-pink-500/60 via-red-500/60 to-indigo-500/40 overflow-hidden">
+                {/* Percentage */}
+                <div className="text-right text-genius-cream">
+                  {holder.percentage !== null ? `${holder.percentage.toFixed(2)}%` : "—"}
+                </div>
+
+                {/* Amount with advanced progress bar */}
+                <div className="w-[calc(50%-1rem)] ml-auto flex justify-end items-center gap-2">
+                  <div className="text-sm">{formatNumber(holder.balance)}</div>
                   <div
-                    className="h-full bg-gray-300 dark:bg-white/80"
-                    style={{
-                      width: `${
-                        holder.percentage !== null
-                          ? Math.min(holder.percentage, 100)
-                          : 0
-                      }%`,
-                    }}
-                  />
+                    className="flex flex-row"
+                    style={{ height: 12, gap: 1 }}
+                  >
+                    {Array.from({ length: 40 }).map((_, idx) => {
+                      const filled = idx < filledSegments;
+                      const isPink = idx < filledSegments / 2;
+                      return (
+                        <div
+                          // eslint-disable-next-line react/no-array-index-key
+                          key={idx}
+                          className={`h-full rounded-[1px] ${
+                            filled
+                              ? isPink
+                                ? "bg-genius-pink"
+                                : "bg-genius-blue"
+                              : "bg-genius-indigo"
+                          }`}
+                          style={{ width: 1 }}
+                        />
+                      );
+                    })}
+                  </div>
+                  <div className="text-sm text-genius-cream/80">
+                    {formatNumber(holder.balance)}
+                  </div>
                 </div>
-                <div className="text-right text-gray-600 dark:text-gray-300">
-                  {formatNumber(holder.balance)}
-                </div>
-              </div>
 
-              <div className="text-right text-gray-600 dark:text-gray-300">
-                {holder.valueUsd != null
-                  ? formatCurrency(holder.valueUsd)
-                  : "—"}
+                {/* Value */}
+                <div className="text-right text-genius-cream">
+                  {holder.valueUsd != null ? formatCurrency(holder.valueUsd) : "—"}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
