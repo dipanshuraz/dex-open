@@ -11,28 +11,42 @@ This document serves as an interactive blueprint detailing the architecture, com
    - **Entry Point**: A landing page with search functionality, chain selection (Ethereum, Base, Arbitrum, etc.), and quick examples.
    - **Action**: Routing to `/[chain]/[tokenAddress]` (e.g., `/ethereum/0xc02aaa...`).
 
-2. **Token Dashboard (`src/app/[chain]/[tokenAddress]/page.tsx`)**
-   - The primary wrapper for an individual token's data. Contains several core widgets that fetch data independently for maximum performance and UI responsiveness.
+2. **Global Layout (`src/app/layout.tsx`)**
+   - **Header** (`components/layout/Header.tsx`): Fixed top nav with logo, main nav links, and a **collapsible Trending** strip. Trending shows hot tokens from `/api/trending` with network toggles (Ethereum, Base, Arbitrum, etc.) and timeframe (24H / 7D / 30D). Collapse state drives `--navbar-height` (52px collapsed, 90px expanded).
+   - **Footer** (`components/layout/Footer.tsx`): Fixed bottom bar with settings, language, and **Major Tickers** (bottom-right). A “more” control opens a popup to show/hide which major tickers (BTC, ETH, SOL, MATIC, AVAX, BNB, etc.) appear in the ticker strip; visible tickers scroll horizontally.
+
+3. **Token Dashboard (`src/app/[chain]/[tokenAddress]/page.tsx`)**
+   - Main content: **TopBar** (chain, token, market selector), **TradingChart**, a **resizer** (vertical drag), and **TabbedPanel** (Trades / Position / Pools / Holders / Traders / Orders / History / Exited).
+   - **Collapsible right panel** (width `SIDEBAR_WIDTH` 350px): Toggle button on the right edge shows/hides the sidebar. When open it contains:
+     - **Advanced Token Stats** (`AdvancedPanelTokenStats.tsx`): Volume, buys/sells counts and values, vol change, and a buy/sell ratio bar for the selected timeframe. Hover reveals a **timeframe selector** (5M, 1H, 4H, 24H) that drives chart and stats.
+     - **TradingControls** (quick actions).
+     - **TokenStats** (`TokenStats.tsx`): Extended token info (top holders, profile, links, etc.).
+   - **Chart/table resizer**: A horizontal bar between the chart and the tabbed panel; drag up/down to resize. Implemented with `useResizePanel` and `lib/constants` (`CHART_HEIGHT_MIN`, `CHART_HEIGHT_MAX`, `CHART_HEIGHT_DEFAULT`).
 
 ### Core Components & Their Data Hooks
-*   **Header & Token Profile (`TokenHeader.tsx`)**
-    *   **Hook**: `useTokenProfile(chain, token)`
-    *   **API**: `/api/token-profiles?chain={chain}&token={token}`
-    *   **Action**: Fetches metadata (social links, market cap, description) via CoinGecko/DexScreener.
-*   **Price Chart (`PriceChart.tsx`)**
+*   **Header & Trending (`Header.tsx`, `useTrendingTokens`)**
+    *   **API**: `/api/trending` — hot tokens list; header shows trending with network and timeframe controls; collapse/expand updates layout padding.
+*   **TopBar & Token Profile (`TopBar.tsx`, `usePairMetadata`, `useTokenProfile`)**
+    *   **API**: `/api/token-profiles`, DexScreener pair metadata.
+    *   **Action**: Token title, price, market selector; metadata (social links, market cap) via CoinGecko/DexScreener.
+*   **Trading Chart (`TradingChart.tsx`)**
     *   **Hook**: `useChartData(chain, token, timeframe)`
     *   **API**: `/api/chart?chain={chain}&token={token}&from={ts}&to={ts}`
-    *   **Implementation**: Utilizes `lightweight-charts` to render native, performant candlestick/line charts.
+    *   **Implementation**: Lightweight Charts candlestick/line charts; timeframe synced with Advanced Token Stats.
+*   **Resizer & Tabbed Panel (`useResizePanel`, `TabbedPanel.tsx`)**
+    *   **Resizer**: Vertical split between chart and tables; mouse drag updates flex ratio (chart height %), with min/max from constants.
+    *   **TabbedPanel**: Tabs for Trades, Pools, Holders, etc.; **TradesTable**, **PoolsTable**, **HoldersTable**.
 *   **Real-time Trades Table (`TradesTable.tsx`)**
     *   **Hook**: `useTrades(chain, token)`
     *   **API**: `/api/trades?chain={chain}&token={token}`
-    *   **Implementation**: Handles both historical data fetching (pagination via `&before={block}`) and optimistic real-time updates injected by WebSockets.
+    *   **Implementation**: Historical pagination and optimistic real-time updates from WebSockets.
 *   **Liquidity Pools Table (`PoolsTable.tsx`)**
     *   **Hook**: `usePools(chain, tokenAddress)`
-    *   **API**: `/api/pools` (Proxy to DexScreener)
-    *   **Action**: Displays all liquidity pools across various DEXs (Uniswap, Sushiswap, Curve, etc.) sorted by liquidity.
-*   **Top Holders & Analytics (`HoldersList.tsx` / `useHolders.ts`)**
-    *   **API**: `/api/holders` (Likely Alchemy SDK token balances API).
+    *   **API**: `/api/pools` (DexScreener proxy); displays pools sorted by liquidity.
+*   **Top Holders (`HoldersTable.tsx` / `useHolders.ts`)**
+    *   **API**: `/api/holders` (token balances / holder analytics).
+*   **Advanced Token Stats & Page Stats (`AdvancedPanelTokenStats.tsx`, `useTokenPageStats`)**
+    *   **Data**: Pair metadata from `usePairMetadata`; `useTokenPageStats` derives volume, buys/sells, vol change, and timeframe list (5M, 1H, 4H, 24H) for the right panel and chart.
 
 ---
 
@@ -63,7 +77,9 @@ All external calls are routed through Next.js App Router API handlers to prevent
 - `/api/token-profiles` - Extended metadata.
 - `/api/trades` - Connects to the server-side `tradeStore` instance to serve WebSocket feeds to the client via HTTP polling.
 - `/api/transactions` - Generic transaction history.
-- `/api/trending` - Hot tokens list.
+- `/api/trending` - Hot tokens list (used by Header trending strip and `useTrendingTokens`).
+
+**Layout constants** (`lib/constants.ts`): `SIDEBAR_WIDTH` (350), `CHART_HEIGHT_MIN` (20), `CHART_HEIGHT_MAX` (80), `CHART_HEIGHT_DEFAULT` (55) for the right panel and chart/table resizer.
 
 ---
 
@@ -78,6 +94,13 @@ All external calls are routed through Next.js App Router API handlers to prevent
    - Automatically filters out unsupported complex pools (like V4 hooks) and selects the single most active standard pool (highest 24h txn count) to monitor via WebSockets.
 4. **Resilient Decoders (`tradeStore.ts`)**
    - Supports decoding disparate models: standard V2 `(amount0In, amount1Out)`, V3 `(amount0, amount1, sqrtPriceX96)`, and Curve `TokenExchange(sold_id, bought_id)`.
+5. **Chart/Table Resizer (`useResizePanel.ts`)**
+   - Vertical drag on the bar between the chart and the tabbed panel updates a flex ratio (chart height %). Uses `containerRef` and mouse move/up listeners; clamps to `CHART_HEIGHT_MIN`/`CHART_HEIGHT_MAX` from `lib/constants`. Body cursor and user-select are set during drag for a native resize feel.
+6. **Collapsible UI**
+   - **Header trending**: Collapse/expand toggles the trending strip and updates `--navbar-height` so main content padding (`pt-[var(--navbar-height)]`) stays in sync.
+   - **Right panel**: Token dashboard sidebar (Advanced Token Stats + TokenStats) can be hidden with a toggle button; width animates to 0 and the toggle moves with the panel edge.
+7. **Major Tickers (Footer)**
+   - Footer shows a horizontal strip of major tickers (BTC, ETH, SOL, etc.). A popup (bottom-right) lists all tickers with toggles to show/hide each in the strip; selection is kept in React state for the session.
 
 ---
 
@@ -85,10 +108,14 @@ All external calls are routed through Next.js App Router API handlers to prevent
 
 - **Multi-Chain Support**: Ethereum, Base, Arbitrum, Optimism, and Polygon.
 - **Universal Search**: Resolve token names, symbols, and contract addresses instantly.
-- **Live Trading View**: Native, fully interactive candlestick charts (via Lightweight Charts).
-- **Sub-second Trade Feed**: WebSocket-powered live scrolling feed of swaps taking place across Uniswap V2/V3 and Curve.
+- **Live Trading View**: Native, fully interactive candlestick charts (via Lightweight Charts); timeframe (5M, 1H, 4H, 24H) synced with the right-panel stats.
+- **Sub-second Trade Feed**: WebSocket-powered live scrolling feed of swaps (Uniswap V2/V3, Curve) in a tabbed panel with resizable chart above.
 - **Whale Tracking**: Visual indicators for trades exceeding high USD thresholds.
-- **Real-time Metrics**: Tracks volume, liquidity, fully diluted valuation (FDV), and Top 10 Holder concentration.
+- **Real-time Metrics**: Volume, liquidity, FDV, Top 10 Holder concentration; **Advanced Token Stats** in the right panel (volume, buys/sells, vol change, buy/sell bar and timeframe selector).
+- **Collapsible Layouts**: Header trending strip can be collapsed to save space; token dashboard **right panel** can be hidden to maximize chart and tables.
+- **Chart & Table Resizer**: Vertical drag bar between the chart and the trades/pools/holders panel to adjust relative height.
+- **Trending**: Hot tokens in the header (from `/api/trending`) with network filters and 24H/7D/30D timeframe.
+- **Major Tickers**: Footer ticker strip (bottom) with configurable visibility via a bottom-right popup (BTC, ETH, SOL, MATIC, AVAX, BNB, etc.).
 
 ---
 
@@ -140,19 +167,43 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ```text
 src/
 ├── app/
-│   ├── api/          # Next.js Serverless API Routes (Proxying external APIs)
-│   ├── [chain]/      # Dynamic routing for Token Dashboards
-│   ├── globals.css   # Tailwind v4, custom scrollbars, and CSS variables
-│   └── page.tsx      # Landing page / Search index
+│   ├── api/              # Next.js API routes (chart, trades, trending, pools, holders, etc.)
+│   ├── [chain]/[tokenAddress]/  # Token dashboard page (TopBar, Chart, Resizer, TabbedPanel, right panel)
+│   ├── globals.css       # Tailwind v4, custom scrollbars, CSS variables
+│   ├── layout.tsx        # Root layout: Header, main (with --navbar-height), Footer
+│   └── page.tsx          # Landing page / Search index
 ├── components/
-│   └── dashboard/    # All primary UI widgets (Trades, Charts, Stats, etc.)
-├── hooks/            # Custom React Hooks (useTrades, usePools, useSmartPolling, etc.)
+│   ├── dashboard/        # Token dashboard widgets
+│   │   ├── TopBar.tsx, TradingChart.tsx, TabbedPanel.tsx
+│   │   ├── AdvancedPanelTokenStats.tsx  # Right panel: volume, buys/sells, timeframe selector
+│   │   ├── TokenStats.tsx               # Right panel: holders, profile, links
+│   │   ├── TradesTable.tsx, PoolsTable.tsx, HoldersTable.tsx
+│   │   ├── TrendingBar.tsx, TrendingTokensPanel.tsx
+│   │   └── ...
+│   ├── layout/
+│   │   ├── Header.tsx    # Nav + collapsible Trending strip
+│   │   └── Footer.tsx   # Settings, Major Tickers strip + popup (bottom-right)
+│   ├── ui/               # Switch and other primitives
+│   └── icons/
+├── hooks/
+│   ├── useTrades.ts, usePools.ts, useHolders.ts, useChartData.ts, usePairMetadata.ts
+│   ├── useResizePanel.ts   # Chart/table vertical resizer (percent, handleResizeStart)
+│   ├── useTrendingTokens.ts
+│   ├── useTokenPageStats.ts # Stats + timeframes for Advanced Token Stats
+│   ├── useSmartPolling.ts, useDocumentTitle.ts, useMarkets.ts, ...
+│   └── index.ts
 ├── lib/
-│   ├── config.ts     # Chain configuration and generic constant variables
-│   ├── tradeStore.ts # Central Server-Side WebSocket Engine for fetching swaps
-│   ├── dexscreener.ts# DexScreener API utilities
-│   ├── decodeSwap.ts # Block explorer link generators
-│   └── theme.ts      # UI helper functions (colors, formatting)
+│   ├── constants.ts    # SIDEBAR_WIDTH, CHART_HEIGHT_MIN/MAX/DEFAULT, EVM_ADDRESS_REGEX
+│   ├── config.ts       # Chain configuration
+│   ├── tradeStore.ts   # Server-side WebSocket engine for swaps
+│   ├── dexscreener.ts  # DexScreener API utilities
+│   ├── decodeSwap.ts   # Block explorer links
+│   ├── validation.ts   # Route validation (chain, tokenAddress)
+│   ├── utils.ts        # formatNumber, formatPriceChange, truncateAddress, etc.
+│   └── theme.ts        # UI helpers (colors, formatting)
+├── types/
+│   └── index.ts        # Trade, Holder, Pool, TrendingToken, TokenStatsData, TimeframeKey, etc.
+└── dummy/               # Static data for nav and landing
 ```
 
 ---
