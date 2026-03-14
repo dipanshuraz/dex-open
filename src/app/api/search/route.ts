@@ -28,12 +28,10 @@ export async function GET(req: NextRequest) {
 
     const json = await res.json();
     return NextResponse.json(json);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Dexscreener search API error:", err);
-    return NextResponse.json(
-      { error: err?.message ?? "Internal server error" },
-      { status: 500 }
-    );
+    const message = err instanceof Error ? err.message : "Internal server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

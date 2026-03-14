@@ -92,7 +92,6 @@ interface StoreEntry {
 
 // ── Global store ──
 declare global {
-  // eslint-disable-next-line no-var
   var __tradeStores: Record<string, StoreEntry> | undefined;
 }
 
@@ -119,11 +118,17 @@ async function resolvePairMeta(
       `https://api.dexscreener.com/token-pairs/v1/${chain}/${tokenAddress}`,
       { next: { revalidate: POLLING_CONFIG.revalidate } }
     );
-    const pairs = await dsRes.json();
-    // Filter out unsupported pools (e.g. Uniswap V4 which uses 66-char PoolId)
-    // We only support standard 42-char EVM contract addresses.
-    const supportedPairs = pairs.filter((p: any) => p.pairAddress && p.pairAddress.length === 42);
-    
+    type DexScreenerPairItem = {
+      pairAddress?: string;
+      txns?: { h24?: { buys?: number; sells?: number } };
+      dexId?: string;
+      baseToken?: { address: string; symbol: string };
+      quoteToken?: { address: string; symbol: string };
+      priceUsd?: string;
+    };
+    const pairs = (await dsRes.json()) as DexScreenerPairItem[];
+    const supportedPairs = pairs.filter((p) => p.pairAddress && p.pairAddress.length === 42);
+
     if (supportedPairs.length === 0) {
       console.warn(`[tradeStore] No supported pools found for ${tokenAddress} among ${pairs.length} candidates`);
       return entry.meta;
@@ -133,13 +138,16 @@ async function resolvePairMeta(
       console.log(`[tradeStore] Filtered out ${pairs.length - supportedPairs.length} unsupported (V4?) pools for ${tokenAddress}`);
     }
 
-    // Pick pool with most 24h transaction activity (not just liquidity)
-    supportedPairs.sort((a: any, b: any) => {
+    supportedPairs.sort((a, b) => {
       const aTxns = (a.txns?.h24?.buys || 0) + (a.txns?.h24?.sells || 0);
       const bTxns = (b.txns?.h24?.buys || 0) + (b.txns?.h24?.sells || 0);
       return bTxns - aTxns;
     });
     const best = supportedPairs[0];
+    if (!best?.pairAddress || !best.baseToken?.address || !best.quoteToken?.address) {
+      console.warn("[tradeStore] Best pair missing required fields");
+      return entry.meta;
+    }
     console.log(`[tradeStore] Selected pool ${best.pairAddress} (${best.dexId}) with ${(best.txns?.h24?.buys||0)+(best.txns?.h24?.sells||0)} 24h txns`);
 
     const baseAddr  = best.baseToken.address.toLowerCase();
@@ -183,7 +191,7 @@ async function resolvePairMeta(
       quoteToken: { address: best.quoteToken.address, symbol: best.quoteToken.symbol, decimals: quoteDec },
       priceUsd: parseFloat(best.priceUsd || "0"),
       token0IsBase,
-      dexId: best.dexId,
+      dexId: best.dexId ?? "",
       baseCoinIndex,
       quoteCoinIndex,
     };
@@ -387,12 +395,10 @@ export async function getTradesForToken(
           entry.oldestBlockScanned = head;
         }
 
-        let lastScannedFrom = head;
         for (let b = 0; b < MAX_BATCHES; b++) {
           const to   = head - b * BATCH_SIZE;
           const from = to - (BATCH_SIZE - 1);
           if (from < 0) break;
-          lastScannedFrom = from;
           // Advance cursor eagerly so errors in this batch don't block future pagination
           if (from < entry.oldestBlockScanned!) entry.oldestBlockScanned = from;
 

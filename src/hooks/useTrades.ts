@@ -3,20 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { POLLING_CONFIG } from "@/lib/config";
+import type { Trade } from "@/types";
 
-export interface Trade {
-  id: string;
-  txHash: string;
-  logIndex: number;
-  trader: string;
-  type: "BUY" | "SELL";
-  price: number;
-  amount: number;
-  total: number;
-  timestamp: number;
-  isNew?: boolean;
-  isWhale?: boolean;
-}
+export type { Trade };
 
 const POLL_MS = POLLING_CONFIG.trades;
 const WHALE_THRESHOLD = 5000;
@@ -109,7 +98,8 @@ export function useTrades(chainId: string, tokenAddress: string) {
 
   useEffect(() => {
     if (isError) {
-      setError((queryError as any)?.message || "Failed to load trades");
+      const message = queryError instanceof Error ? queryError.message : "Failed to load trades";
+      setError(message);
     } else {
       setError(null);
     }

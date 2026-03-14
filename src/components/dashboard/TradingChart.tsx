@@ -88,14 +88,15 @@ const FREQUENCIES = [
 ] as const;
 
 export function TradingChart({
-  chainId,
   tokenAddress,
   resizeTrigger,
+  chainId: _chainId,
 }: {
   chainId: string;
   tokenAddress: string;
   resizeTrigger?: number;
 }) {
+  void _chainId;
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
@@ -192,12 +193,22 @@ export function TradingChart({
         }
         return;
       }
-      const data = param.seriesData.get(candleSeries) as any;
+      interface CandleData {
+        open?: number;
+        high?: number;
+        low?: number;
+        close?: number;
+      }
+      const data = param.seriesData.get(candleSeries) as CandleData | undefined;
       if (data && typeof data.close === "number") {
         const first = currentCandles[0];
         if (first) {
-          const diff = data.close - first.open;
-          setPricing({ o: data.open, h: data.high, l: data.low, c: data.close, diff, pct: (diff / first.open) * 100 });
+          const o = data.open ?? data.close;
+          const h = data.high ?? data.close;
+          const l = data.low ?? data.close;
+          const c = data.close;
+          const diff = c - first.open;
+          setPricing({ o, h, l, c, diff, pct: (diff / first.open) * 100 });
         }
       }
     });
@@ -213,6 +224,7 @@ export function TradingChart({
       ro.disconnect();
       chart.remove();
     };
+    /* eslint-disable-next-line react-hooks/exhaustive-deps -- mount once; theme sync in separate effect */
   }, []);
 
   useEffect(() => {
@@ -234,12 +246,12 @@ export function TradingChart({
       timeScale: { borderColor: isDark ? c.border : "rgba(0,0,0,0.1)" },
       rightPriceScale: { borderColor: isDark ? c.border : "rgba(0,0,0,0.1)" },
     });
-  }, [isDark]);
+  }, [isDark, applySize]);
 
   useEffect(() => {
     candlesRef.current = candles;
     if (seriesRef.current && candles.length > 0) {
-      seriesRef.current.setData(candles as any);
+      seriesRef.current.setData(candles as Parameters<ISeriesApi<"Candlestick">["setData"]>[0]);
       chartRef.current?.timeScale().fitContent();
       setTimeout(() => {
         if (candles.length > 0) {

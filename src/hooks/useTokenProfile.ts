@@ -1,14 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { TokenProfile } from "@/types";
 
-export interface TokenProfile {
-  tokenAddress: string;
-  icon?: string;
-  header?: string | null;
-  description?: string | null;
-  links?: { type?: string | null; label?: string | null; url: string }[] | null;
-}
+export type { TokenProfile };
 
 interface UseTokenProfileResult {
   profile: TokenProfile | null;
@@ -40,10 +35,10 @@ export function useTokenProfile(tokenAddress: string): UseTokenProfileResult {
         if (!isMounted) return;
         setProfile(data);
         setError(null);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("useTokenProfile error:", err);
         if (!isMounted) return;
-        setError(err?.message || "Failed to load token profile");
+        setError(err instanceof Error ? err.message : "Failed to load token profile");
       } finally {
         if (isMounted) setLoading(false);
       }

@@ -50,13 +50,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ holders: [], error: message }, { status: 502 });
     }
 
-    const json: any = await res.json();
+    const json = (await res.json()) as { result?: Array<Record<string, unknown>> };
 
     if (!Array.isArray(json.result)) {
       return NextResponse.json({ holders: [], warning: "No holder data" });
     }
 
-    const holders = json.result.map((h: any, i: number) => {
+    const holders = json.result.map((h: Record<string, unknown>, i: number) => {
       const rawBalance =
         typeof h.balance === "string"
           ? parseFloat(h.balance)
@@ -76,9 +76,11 @@ export async function POST(req: NextRequest) {
           ? rawBalance
           : 0;
 
+      const address = (h.owner_address ?? h.address ?? "") as string;
+
       return {
         rank: i + 1,
-        address: h.owner_address ?? h.address ?? "",
+        address,
         balance: balanceFormatted,
         percentage:
           percentage !== null && isNaN(percentage) ? null : percentage,
@@ -87,7 +89,8 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ holders });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

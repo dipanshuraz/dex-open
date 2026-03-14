@@ -1,17 +1,8 @@
-import { useState, useEffect } from 'react';
-import { POLLING_CONFIG } from '@/lib/config';
+import { useState, useEffect } from "react";
+import { POLLING_CONFIG } from "@/lib/config";
+import type { Pool } from "@/types";
 
-
-export interface Pool {
-  dex: string;
-  pair: string;
-  liquidity: number;
-  volume: number;
-  age: number;
-  pairAddress: string;
-  url: string;
-}
-
+export type { Pool };
 export function usePools(chain: string, tokenAddress: string) {
   const [data, setData] = useState<Pool[]>([]);
   const [loading, setLoading] = useState(true);

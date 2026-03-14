@@ -1,6 +1,7 @@
 "use client";
 
 import { useHolders } from "@/hooks/useHolders";
+import type { Holder } from "@/types";
 import { truncateAddress } from "@/lib/utils";
 import { Users } from "lucide-react";
 
@@ -23,7 +24,7 @@ export function HoldersList({ tokenAddress }: { tokenAddress: string }) {
          <div className="flex-1 flex justify-center items-center text-red-400 bg-red-500/10 rounded-xl">Error loading holders</div>
       ) : (
          <div className="flex flex-col gap-3 overflow-y-auto pr-2">
-           {holders.slice(0, 10).map((holder: any, idx: number) => (
+           {holders.slice(0, 10).map((holder: Holder, idx: number) => (
              <div key={holder.address} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
                 <div className="flex items-center gap-3">
                     <span className="text-xs font-bold text-gray-500 w-4">{idx + 1}</span>
@@ -36,12 +37,11 @@ export function HoldersList({ tokenAddress }: { tokenAddress: string }) {
                     </div>
                 </div>
                 <div className="flex flex-col items-end">
-                    <span className="font-bold text-white">{holder.percentage.toFixed(2)}%</span>
-                    {/* Basic visual bar for holding size */}
+                    <span className="font-bold text-white">{holder.percentage != null ? holder.percentage.toFixed(2) : "—"}%</span>
                     <div className="w-20 h-1.5 bg-gray-800 rounded-full mt-1 overflow-hidden">
                         <div 
                            className="h-full bg-gradient-to-r from-blue-500 to-purple-500" 
-                           style={{ width: `${Math.min(holder.percentage, 100)}%` }}
+                           style={{ width: `${Math.min(holder.percentage ?? 0, 100)}%` }}
                         />
                     </div>
                 </div>

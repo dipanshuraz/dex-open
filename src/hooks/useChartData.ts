@@ -2,16 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { POLLING_CONFIG } from "@/lib/config";
+import type { OHLCCandle } from "@/types";
+
+export type { OHLCCandle };
 
 const DEFAULT_POLL_MS = POLLING_CONFIG.chartData;
-
-export interface OHLCCandle {
-  time: number;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-}
 
 // ── Client-side in-memory cache: key = `${coingeckoId}:${days}` ──
 // Candles are stored permanently per session; stale check uses `fetchedAt`.
@@ -33,7 +28,7 @@ export function useChartData(coingeckoId: string | null, days: number = 7, pollM
     const hit = chartCache.get(cacheKey);
     return !hit || hit.candles.length === 0;
   });
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<Error | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -65,9 +60,12 @@ export function useChartData(coingeckoId: string | null, days: number = 7, pollM
           setLoading(false);
           setError(null);
         }
-      } catch (err: any) {
-        console.error("Chart data error:", err.message);
-        if (isMounted) { setError(err); setLoading(false); }
+      } catch (err: unknown) {
+        console.error("Chart data error:", err instanceof Error ? err.message : err);
+        if (isMounted) {
+          setError(err instanceof Error ? err : new Error(String(err)));
+          setLoading(false);
+        }
         if (intervalRef.current) clearInterval(intervalRef.current);
       }
     }

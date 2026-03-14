@@ -1,6 +1,8 @@
 "use client";
 
-import { useTrades, Trade } from "@/hooks/useTrades";
+import { useTrades } from "@/hooks/useTrades";
+import type { Trade } from "@/types";
+import { useNow } from "@/hooks/useNow";
 import { formatNumber } from "@/lib/utils";
 import { getExplorerUrl } from "@/lib/decodeSwap";
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
@@ -17,27 +19,6 @@ const TRADES_COLUMNS = [
   { key: "totalUsd", label: "Total USD", sortable: true, align: "left" as const },
   { key: "trader", label: "Trader", sortable: false, align: "right" as const },
 ] as const;
-
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 767px)");
-    setIsMobile(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
-  return isMobile;
-}
-
-function useNow() {
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, []);
-  return now;
-}
 
 function shortAddr(a: string) {
   if (!a || a.length < 10) return a || "—";
@@ -65,59 +46,6 @@ function formatMcap(value: number) {
   if (value >= 1e6) return `$${(value / 1e6).toFixed(3)}M`;
   if (value >= 1e3) return `$${(value / 1e3).toFixed(3)}K`;
   return `$${formatNumber(value)}`;
-}
-
-function CompactTradeRow({
-  trade,
-  now,
-  explorer,
-}: {
-  trade: Trade;
-  now: number;
-  explorer: string;
-}) {
-  const isBuy = trade.type === "BUY";
-  const bgFlash = trade.isNew
-    ? isBuy ? "bg-genius-green/10" : "bg-genius-red/10"
-    : "";
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -4 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25 }}
-      className={`flex items-center justify-between px-3 py-2 border-b border-genius-blue/30 transition-colors duration-700 ${bgFlash}`}
-    >
-      <div className="flex items-center gap-2 min-w-0">
-        <span
-          className={`shrink-0 text-[10px] font-extrabold tracking-wider px-1.5 py-0.5 rounded ${
-            isBuy ? "text-genius-green bg-genius-green/20" : "text-genius-red bg-genius-red/20"
-          }`}
-        >
-          {trade.isNew && (
-            <span className={`inline-block w-1 h-1 rounded-full mr-1 animate-ping align-middle ${isBuy ? "bg-genius-green" : "bg-genius-red"}`} />
-          )}
-          {trade.type}
-        </span>
-        <span className={`text-[12px] font-semibold font-mono truncate ${isBuy ? "text-genius-green" : "text-genius-red"}`}>
-          ${formatNumber(trade.total)}
-        </span>
-      </div>
-
-      <div className="flex items-center gap-3 shrink-0 text-[11px] font-mono text-genius-cream/70">
-        <span>${formatNumber(trade.price)}</span>
-        <span>{ageStr(now, trade.timestamp)}</span>
-        <a
-          href={`${explorer}/tx/${trade.txHash}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:text-genius-pink transition-colors"
-        >
-          <ExternalLink className="w-3 h-3" />
-        </a>
-      </div>
-    </motion.div>
-  );
 }
 
 function TradesTableHeader({
@@ -320,6 +248,11 @@ export function TradesTable({
   const now = useNow();
   const explorer = getExplorerUrl(chainId);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const [scrollEl, setScrollEl] = useState<HTMLDivElement | null>(null);
+  const setScrollRef = useCallback((el: HTMLDivElement | null) => {
+    scrollRef.current = el;
+    setScrollEl(el);
+  }, []);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [ageColumnMode, setAgeColumnMode] = useState<"age" | "time">("age");
@@ -381,7 +314,7 @@ export function TradesTable({
         />
       </header>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto custom-scrollbar relative">
+      <div ref={setScrollRef} className="flex-1 overflow-y-auto custom-scrollbar relative">
         {error && !loading && (
           <div className="absolute top-2 left-3 right-3 z-10 rounded-md border border-genius-red/40 bg-genius-red/10 px-3 py-2 text-[11px] text-genius-cream font-sans flex items-start gap-2 pointer-events-none">
             <span className="mt-px text-[12px]">!</span>
@@ -407,7 +340,7 @@ export function TradesTable({
                   trades={visibleTrades}
                   now={now}
                   explorer={explorer}
-                  scrollElement={scrollRef.current}
+                  scrollElement={scrollEl}
                   onFilterByTrader={(address) => setSearch(address)}
                   ageColumnMode={ageColumnMode}
                   priceColumnMode={priceColumnMode}
@@ -460,6 +393,7 @@ function VirtualizedTrades({
     return Math.max(...trades.map((t) => t.total));
   }, [trades]);
 
+  /* eslint-disable-next-line react-hooks/incompatible-library -- TanStack Virtual returns unstable callbacks */
   const rowVirtualizer = useVirtualizer({
     count: trades.length,
     getScrollElement: () => scrollElement,

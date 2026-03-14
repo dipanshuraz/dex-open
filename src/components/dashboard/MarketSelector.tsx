@@ -38,10 +38,13 @@ export function MarketSelector({ chainId, tokenAddress, onPoolSelect }: Props) {
   }, []);
 
   useEffect(() => {
-    if (open) {
-      setSearch("");
-      setTimeout(() => searchRef.current?.focus(), 50);
-    }
+    if (!open) return;
+    const id = setTimeout(() => setSearch(""), 0);
+    const focusId = setTimeout(() => searchRef.current?.focus(), 50);
+    return () => {
+      clearTimeout(id);
+      clearTimeout(focusId);
+    };
   }, [open]);
 
   useEffect(() => {

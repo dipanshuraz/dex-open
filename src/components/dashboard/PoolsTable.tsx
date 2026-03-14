@@ -1,22 +1,14 @@
 "use client";
 
-import { usePools, Pool } from "@/hooks/usePools";
+import { usePools } from "@/hooks/usePools";
+import type { Pool } from "@/types";
+import { useNow } from "@/hooks/useNow";
 import { formatNumber } from "@/lib/utils";
 import { getDexIcon } from "@/lib/theme";
-import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CopyIcon } from "@/components/icons/CopyIcon";
 import { ExternalLink } from "lucide-react";
 import { TableEmptyState } from "./TableEmptyState";
-
-function useNow() {
-  const [now, setNow] = useState(Date.now());
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-  return now;
-}
 
 function PoolRow({ pool, now }: { pool: Pool; now: number }) {
   const seconds = Math.floor((now - pool.age) / 1000);

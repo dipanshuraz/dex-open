@@ -25,17 +25,28 @@ export async function GET(req: Request) {
         return NextResponse.json([]);
     }
 
-    const pools = pairs
-      .sort((a: any, b: any) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))
+    interface DexPairRow {
+      dexId?: string;
+      baseToken?: { symbol?: string };
+      quoteToken?: { symbol?: string };
+      liquidity?: { usd?: number };
+      volume?: { h24?: number };
+      pairCreatedAt?: number;
+      pairAddress?: string;
+      url?: string;
+    }
+
+    const pools = (pairs as DexPairRow[])
+      .sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))
       .slice(0, 10)
-      .map((pair: any) => ({
+      .map((pair) => ({
         dex: pair.dexId,
-        pair: `${pair.baseToken.symbol}/${pair.quoteToken.symbol}`,
+        pair: `${pair.baseToken?.symbol ?? "?"}/${pair.quoteToken?.symbol ?? "?"}`,
         liquidity: pair.liquidity?.usd || 0,
         volume: pair.volume?.h24 || 0,
         age: pair.pairCreatedAt,
         pairAddress: pair.pairAddress,
-        url: pair.url || `https://dexscreener.com/${chain}/${pair.pairAddress}`
+        url: pair.url || `https://dexscreener.com/${chain}/${pair.pairAddress ?? ""}`,
       }));
 
     return NextResponse.json(pools);

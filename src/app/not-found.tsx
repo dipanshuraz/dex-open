@@ -3,7 +3,7 @@ import { MoveLeft, Ghost } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-[#070815] text-white flex flex-col items-center justify-center px-4 font-sans relative overflow-hidden">
+    <div className="min-h-screen bg-surface-dark text-white flex flex-col items-center justify-center px-4 font-sans relative overflow-hidden">
       {/* Background glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[120px]" />
@@ -20,7 +20,7 @@ export default function NotFound() {
             Page Not Found
           </h2>
           <p className="text-gray-400 text-sm leading-relaxed">
-            The token address or blockchain you're looking for doesn't exist in our records. Please check the URL or try searching again.
+            The token address or blockchain you&apos;re looking for doesn&apos;t exist in our records. Please check the URL or try searching again.
           </p>
         </div>
 

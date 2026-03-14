@@ -47,6 +47,7 @@ export function TradingControls() {
   const [targetPricePct, setTargetPricePct] = useState("+0.00");
   const [impliedCapSlider, setImpliedCapSlider] = useState(50);
   const [timeInForce, setTimeInForce] = useState("GTC");
+  void setTimeInForce;
   const [slippage, setSlippage] = useState("0.5");
   const [priorityGwei, setPriorityGwei] = useState("0");
   const hasSelectedAsset = false;

@@ -12,7 +12,7 @@ export function TrendingTokensPanel() {
   const top = tokens.slice(0, 8);
 
   return (
-    <div className="flex flex-col px-4 pt-4 pb-2 font-sans border-b border-black/10 dark:border-[#221A30]">
+    <div className="flex flex-col px-4 pt-4 pb-2 font-sans border-b border-black/10 dark:border-panel-border">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2 text-xs font-bold text-black dark:text-white">
           <Flame className="w-4 h-4 text-orange-400" />

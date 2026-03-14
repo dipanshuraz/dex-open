@@ -1,20 +1,9 @@
- "use client";
+"use client";
 
 import { useEffect, useState } from "react";
+import type { TrendingToken } from "@/types";
 
-export interface TrendingToken {
-  symbol: string;
-  marketCap: number;
-  change24h: number;
-  volume24h: number;
-  txns24h: number;
-  trendScore: number;
-  pairAddress: string;
-  chainId: string;
-  logo: string | null;
-  tokenAddress?: string;
-  boosts?: { score?: number } | null;
-}
+export type { TrendingToken };
 
 interface UseTrendingResult {
   tokens: TrendingToken[];
@@ -42,10 +31,10 @@ export function useTrendingTokens(): UseTrendingResult {
         if (!isMounted) return;
         setTokens(Array.isArray(data) ? data : []);
         setError(null);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("useTrendingTokens error:", err);
         if (!isMounted) return;
-        setError(err?.message || "Failed to load trending tokens");
+        setError(err instanceof Error ? err.message : "Failed to load trending tokens");
       } finally {
         if (isMounted) setLoading(false);
       }

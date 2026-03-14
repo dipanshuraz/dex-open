@@ -35,8 +35,6 @@ export interface DexScreenerResponse {
   pairs: DexPair[] | null;
 }
 
-const STABLE_QUOTES = ["USDC", "USDT", "WETH", "WBTC", "DAI", "WETH.E", "USDC.E"];
-
 export type SupportLevel = "NATIVE_DECODE" | "FALLBACK";
 
 /**
@@ -82,7 +80,7 @@ export async function fetchPairs(
   address: string, 
   searchType: "token" | "pair" = "token"
 ): Promise<DexPair[]> {
-  const body: any = { chainId };
+  const body: { chainId: string; pairAddress?: string; tokenAddress?: string } = { chainId };
   if (searchType === "pair") body.pairAddress = address;
   else body.tokenAddress = address;
 

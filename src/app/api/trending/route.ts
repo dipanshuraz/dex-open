@@ -30,7 +30,7 @@ export async function GET() {
     let boostedPairs: DexPair[] = [];
 
     if (boostsRes.ok) {
-      const boosts: any[] = await boostsRes.json();
+      const boosts = (await boostsRes.json()) as { tokenAddress?: string }[];
       const addresses = Array.from(
         new Set(boosts.map((b) => b.tokenAddress).filter(Boolean))
       ).slice(0, 50); // cap to avoid huge requests
@@ -138,8 +138,9 @@ export async function GET() {
 
     // 6. Return normalized response
     return NextResponse.json(top20);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[api/trending] Error:", error);
-    return NextResponse.json({ error: error.message ?? "Internal error" }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Internal error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

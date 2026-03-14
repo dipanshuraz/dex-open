@@ -10,7 +10,7 @@ const POLL_INTERVAL = POLLING_CONFIG.pairMetadata;
 export function usePairMetadata(chainId: string, pairAddress: string) {
   const [metadata, setMetadata] = useState<DexPair | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<Error | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -25,10 +25,10 @@ export function usePairMetadata(chainId: string, pairAddress: string) {
           setLoading(false);
           setError(null);
         }
-      } catch (err: any) {
-        console.error("Pair metadata error:", err.message);
+      } catch (err: unknown) {
+        console.error("Pair metadata error:", err instanceof Error ? err.message : err);
         if (isMounted) {
-          setError(err);
+          setError(err instanceof Error ? err : new Error(String(err)));
           setLoading(false);
         }
         if (intervalRef.current) clearInterval(intervalRef.current);

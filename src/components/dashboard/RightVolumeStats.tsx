@@ -19,7 +19,7 @@ export function RightVolumeStats({ chainId, pairAddress }: { chainId: string; pa
   const volChange = metadata?.priceChange?.h24 ?? 0; // fallback to price change since dex api doesn't give vol change directly
 
   return (
-    <div className="flex flex-col font-sans px-4 pt-4 pb-0 border-b border-black/10 dark:border-[#221A30]">
+    <div className="flex flex-col font-sans px-4 pt-4 pb-0 border-b border-black/10 dark:border-panel-border">
       <div className="flex items-center justify-between text-[11px] font-bold text-gray-800 dark:text-gray-400 tracking-wider">
         <div className="flex flex-col gap-1">
           <span className="uppercase whitespace-nowrap text-gray-500 dark:text-gray-400">Volume 24h</span>
@@ -29,34 +29,33 @@ export function RightVolumeStats({ chainId, pairAddress }: { chainId: string; pa
         </div>
         <div className="flex flex-col gap-1 text-center">
           <span className="uppercase">Buys</span>
-          <span className="text-[#34D399] tracking-normal">
+          <span className="text-genius-green tracking-normal">
             {loading ? "--" : buys}{" "}
-            <span className="text-[#34D399]/70">
+            <span className="text-genius-green/70">
               / {loading ? "--" : `$${formatNumber(buyVol)}`}
             </span>
           </span>
         </div>
         <div className="flex flex-col gap-1 text-center">
           <span className="uppercase">Sells</span>
-          <span className="text-[#F43F5E] tracking-normal">
+          <span className="text-genius-red tracking-normal">
             {loading ? "--" : sells}{" "}
-            <span className="text-[#F43F5E]/70">
+            <span className="text-genius-red/70">
               / {loading ? "--" : `$${formatNumber(sellVol)}`}
             </span>
           </span>
         </div>
         <div className="flex flex-col gap-1 text-right">
           <span className="uppercase">Price Change (24h)</span>
-          <span className={volChange >= 0 ? "text-[#34D399]" : "text-[#F43F5E]"}>
+          <span className={volChange >= 0 ? "text-genius-green" : "text-genius-red"}>
             {loading ? "--" : `${volChange >= 0 ? "+" : ""}${volChange.toFixed(2)}%`}
           </span>
         </div>
       </div>
 
-      {/* Progress Bars */}
       <div className="flex gap-1 mt-3 mb-4 h-[3px] rounded-full overflow-hidden w-full">
-        <div className="bg-[#34D399]" style={{ width: `${buyRatio * 100}%` }}></div>
-        <div className="bg-[#F43F5E]" style={{ width: `${(1 - buyRatio) * 100}%` }}></div>
+        <div className="bg-genius-green" style={{ width: `${buyRatio * 100}%` }} />
+        <div className="bg-genius-red" style={{ width: `${(1 - buyRatio) * 100}%` }} />
       </div>
     </div>
   );

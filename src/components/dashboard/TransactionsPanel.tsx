@@ -2,6 +2,7 @@
 
 import { useMemo, useEffect, useState } from "react";
 import { useTransactions } from "@/hooks/useTransactions";
+import { useNow } from "@/hooks/useNow";
 import { formatNumber } from "@/lib/utils";
 import { Activity } from "lucide-react";
 
@@ -12,6 +13,7 @@ interface TransactionsPanelProps {
 
 export function TransactionsPanel({ chainId, pairAddress }: TransactionsPanelProps) {
   const { data, deltas, loading, error } = useTransactions(chainId, pairAddress);
+  const now = useNow(5000);
   const [flashKeys, setFlashKeys] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -25,25 +27,31 @@ export function TransactionsPanel({ chainId, pairAddress }: TransactionsPanelPro
 
     if (toFlash.length === 0) return;
 
-    setFlashKeys((prev) => {
-      const next = { ...prev };
-      toFlash.forEach((k) => {
-        next[k] = true;
-      });
-      return next;
-    });
-
-    const timeout = setTimeout(() => {
+    const keysToFlash = toFlash;
+    const timeoutId = setTimeout(() => {
       setFlashKeys((prev) => {
         const next = { ...prev };
-        toFlash.forEach((k) => {
+        keysToFlash.forEach((k) => {
+          next[k] = true;
+        });
+        return next;
+      });
+    }, 0);
+
+    const clearId = setTimeout(() => {
+      setFlashKeys((prev) => {
+        const next = { ...prev };
+        keysToFlash.forEach((k) => {
           next[k] = false;
         });
         return next;
       });
     }, 500);
 
-    return () => clearTimeout(timeout);
+    return () => {
+      clearTimeout(timeoutId);
+      clearTimeout(clearId);
+    };
   }, [deltas]);
 
   const buyPressurePct = useMemo(() => {
@@ -55,12 +63,12 @@ export function TransactionsPanel({ chainId, pairAddress }: TransactionsPanelPro
 
   const lastUpdatedText = useMemo(() => {
     if (!data?.lastUpdated) return "—";
-    const deltaSec = Math.floor((Date.now() - data.lastUpdated) / 1000);
+    const deltaSec = Math.floor((now - data.lastUpdated) / 1000);
     if (deltaSec < 5) return "Just now";
     if (deltaSec < 60) return `${deltaSec}s ago`;
     const minutes = Math.floor(deltaSec / 60);
     return `${minutes}m ago`;
-  }, [data?.lastUpdated]);
+  }, [data, now]);
 
   return (
     <div className="rounded-xl border border-genius-blue/30 bg-card-gradient text-xs text-genius-cream p-4 flex flex-col gap-3 shadow-card">

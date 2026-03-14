@@ -10,7 +10,6 @@ import { TrendingFlameIcon } from "@/components/icons/TrendingFlameIcon";
 import { StarIcon } from "@/components/icons/StarIcon";
 import { ClockIcon } from "@/components/icons/ClockIcon";
 import { Search, ClipboardList, ChevronDown } from "lucide-react";
-import { GlobalSearch } from "@/components/dashboard/GlobalSearch";
 import { Switch } from "@/components/ui/Switch";
 
 const HEADER_HEIGHT_COLLAPSED = "52px";
@@ -109,7 +108,6 @@ const Header = () => {
         </div>
 
         <div className="flex items-center gap-1.5">
-          <GlobalSearch />
           <button
             type="button"
             className="md:hidden inline-flex items-center justify-center whitespace-nowrap rounded-sm text-md lg:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 bg-transparent p-2"

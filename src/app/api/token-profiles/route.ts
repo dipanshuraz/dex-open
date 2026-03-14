@@ -27,21 +27,22 @@ export async function GET(req: NextRequest) {
     }
 
     const lower = tokenAddress.toLowerCase();
+    interface ProfileItem {
+      tokenAddress?: string;
+    }
     const match =
       Array.isArray(profiles) &&
-      profiles.find((p: any) => p.tokenAddress?.toLowerCase() === lower);
+      (profiles as ProfileItem[]).find((p) => p.tokenAddress?.toLowerCase() === lower);
 
     if (!match) {
       return NextResponse.json(null);
     }
 
     return NextResponse.json(match);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Dexscreener token-profiles API error:", err);
-    return NextResponse.json(
-      { error: err?.message ?? "Internal server error" },
-      { status: 500 }
-    );
+    const message = err instanceof Error ? err.message : "Internal server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

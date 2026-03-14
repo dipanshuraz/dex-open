@@ -2,15 +2,9 @@
 
 import { useEffect, useState } from "react";
 import type { DexPair } from "@/lib/dexscreener";
+import type { MarketOption } from "@/types";
 
-export interface MarketOption {
-  id: string;
-  label: string;
-  dexId: string;
-  liquidityUsd: number;
-  pairAddress: string;
-  isPreferred: boolean;
-}
+export type { MarketOption };
 
 interface UseMarketsResult {
   markets: MarketOption[];
@@ -74,10 +68,10 @@ export function useMarkets(
           : options[0];
         setSelected(initial);
         setError(null);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("useMarkets error:", err);
         if (!isMounted) return;
-        setError(err?.message || "Failed to load markets");
+        setError(err instanceof Error ? err.message : "Failed to load markets");
       } finally {
         if (isMounted) setLoading(false);
       }

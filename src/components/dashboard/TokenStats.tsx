@@ -154,14 +154,16 @@ function InfoCard({
   value,
   label,
   valueClassName = "",
+  className = "",
 }: {
   icon: React.ComponentType<{ className?: string }>;
   value: string;
   label: string;
   valueClassName?: string;
+  className?: string;
 }) {
   return (
-    <div className="h-14 flex flex-col justify-center items-center bg-genius-indigo border border-genius-blue rounded-sm p-1.5 min-h-0">
+    <div className={`h-14 flex flex-col justify-center items-center bg-genius-indigo border border-genius-blue rounded-sm p-1.5 min-h-0 ${className}`.trim()}>
       <div className={`flex items-center gap-1.5 text-sm ${valueClassName}`}>
         <Icon className="size-3.5 shrink-0" />
         <div>{value}</div>
@@ -211,31 +213,32 @@ export function TokenStats({
           data-sentry-component="AdvancedOverviewTokenInfo"
           data-sentry-source-file="AdvancedOverviewTokenInfo.tsx"
         >
-          <div className="grid grid-cols-3 gap-3 text-sm border-l-0">
+          <div className="grid grid-cols-6 gap-3 text-sm border-l-0">
             <InfoCard
               icon={UserStarIcon}
               value={top10Pct}
               label="TOP 10 H."
               valueClassName={top10Red ? "text-genius-red" : ""}
+              className="col-span-2"
             />
-            <InfoCard icon={ChefHatIcon} value="-" label="DEV H." />
-            <InfoCard icon={Crosshair} value="-" label="SNIPERS H." />
-            <InfoCard icon={HatGlasseIcon} value="-" label="INSIDERS H." />
-            <InfoCard icon={VirusIcon} value="-" label="BUNDLERS H." />
+            <InfoCard icon={ChefHatIcon} value="-" label="DEV H." className="col-span-2" />
+            <InfoCard icon={Crosshair} value="-" label="SNIPERS H." className="col-span-2" />
+            <InfoCard icon={HatGlasseIcon} value="-" label="INSIDERS H." className="col-span-2" />
+            <InfoCard icon={VirusIcon} value="-" label="BUNDLERS H." className="col-span-2" />
             <InfoCard
               icon={DexPaymentIcon}
               value="Unpaid"
               label="DEX PAYMENT"
               valueClassName="text-genius-red"
+              className="col-span-2"
             />
-            <div className="col-span-3 flex gap-3">
-              <InfoCard
-                icon={UsersRoundIcon}
-                value={holdersCount}
-                label="Holders"
-              />
-              <InfoCard icon={Flame} value="-" label="LP BURNED" />
-            </div>
+            <InfoCard
+              icon={UsersRoundIcon}
+              value={holdersCount}
+              label="Holders"
+              className="col-span-3"
+            />
+            <InfoCard icon={Flame} value="-" label="LP BURNED" className="col-span-3" />
           </div>
 
           <div className="flex items-center justify-between px-3 py-2 border border-genius-blue rounded-sm hover:opacity-70 transition-opacity cursor-pointer">

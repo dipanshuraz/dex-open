@@ -42,7 +42,7 @@ const POSITION_HEADERS = [
 export function TabbedPanel({
   chainId,
   tokenAddress,
-  pairAddress,
+  pairAddress: _pairAddress,
   marketCap,
 }: {
   chainId: string;
@@ -53,6 +53,8 @@ export function TabbedPanel({
   const [activeTab, setActiveTab] = useState<Tab>("trades");
   const [btcOnly, setBtcOnly] = useState(false);
   const [panelVisible, setPanelVisible] = useState(true);
+  void _pairAddress;
+  void panelVisible;
 
   const showTrades = activeTab === "trades";
   const showPools = activeTab === "pools";

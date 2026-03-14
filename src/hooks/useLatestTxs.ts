@@ -17,7 +17,7 @@ export interface TradePeriodStats {
 export function useTradeStats(chainId: string, pairAddress: string) {
   const [stats, setStats] = useState<TradePeriodStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<Error | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -37,9 +37,12 @@ export function useTradeStats(chainId: string, pairAddress: string) {
         });
         setLoading(false);
         setError(null);
-      } catch (err: any) {
-        console.error("Trade stats error:", err.message);
-        if (isMounted) { setError(err); setLoading(false); }
+      } catch (err: unknown) {
+        console.error("Trade stats error:", err instanceof Error ? err.message : err);
+        if (isMounted) {
+          setError(err instanceof Error ? err : new Error(String(err)));
+          setLoading(false);
+        }
         if (intervalRef.current) clearInterval(intervalRef.current);
       }
     }

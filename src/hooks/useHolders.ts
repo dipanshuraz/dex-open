@@ -2,12 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { POLLING_CONFIG } from "@/lib/config";
+import type { Holder } from "@/types";
+
+export type { Holder };
 
 const POLL_INTERVAL = POLLING_CONFIG.holders;
-const CACHE_TTL = POLL_INTERVAL; // treat cache as stale after same interval
+const CACHE_TTL = POLL_INTERVAL;
 
-
-// Simple in-memory cache so tab switches don't trigger loading skeletons
 type HoldersCacheEntry = {
   holders: Holder[];
   error: Error | null;
@@ -15,14 +16,6 @@ type HoldersCacheEntry = {
 };
 
 const holdersCache = new Map<string, HoldersCacheEntry>();
-
-export interface Holder {
-  rank: number;
-  address: string;
-  balance: number;
-  percentage: number | null;
-  valueUsd: number | null;
-}
 
 export function useHolders(tokenAddress: string, chainId: string = "ethereum") {
   const cacheKey = `${chainId}:${tokenAddress}`;
@@ -72,9 +65,9 @@ export function useHolders(tokenAddress: string, chainId: string = "ethereum") {
           setError(null);
           setLoading(false);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         const error =
-          err instanceof Error ? err : new Error(err?.message || "Holders request failed");
+          err instanceof Error ? err : new Error(String(err));
         console.error("Holders error:", error.message);
 
         // keep last good data in cache; just update error + timestamp
@@ -100,6 +93,7 @@ export function useHolders(tokenAddress: string, chainId: string = "ethereum") {
       isMounted = false;
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
+    /* eslint-disable-next-line react-hooks/exhaustive-deps -- cacheKey/holders omitted to avoid loop */
   }, [tokenAddress, chainId]);
 
   return { holders, loading, error };

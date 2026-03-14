@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { usePairMetadata } from "@/hooks/usePairMetadata";
 import { useTokenProfile } from "@/hooks/useTokenProfile";
@@ -33,16 +34,20 @@ export function TopBar({
     if (!Number.isFinite(currentPrice)) return;
     const last = lastPriceRef.current;
     if (last != null && last !== currentPrice) {
-      setPriceFlash(currentPrice > last ? "up" : "down");
-      const tid = setTimeout(() => setPriceFlash(null), 400);
-      return () => clearTimeout(tid);
+      const flash: "up" | "down" = currentPrice > last ? "up" : "down";
+      const deferId = setTimeout(() => setPriceFlash(flash), 0);
+      const clearId = setTimeout(() => setPriceFlash(null), 400);
+      return () => {
+        clearTimeout(deferId);
+        clearTimeout(clearId);
+      };
     }
     lastPriceRef.current = currentPrice;
   }, [currentPrice]);
 
   if (loading) {
     return (
-      <div className="h-16 w-full animate-pulse bg-white dark:bg-skeleton border-b border-genius-blue/50" />
+      <div className="h-16 w-full animate-pulse bg-background border-b border-genius-blue/50" />
     );
   }
 
@@ -137,7 +142,7 @@ export function TopBar({
           <div className="flex items-center gap-3 relative group/tokenimage">
             <div className="relative rounded-md border border-genius-blue/80 w-8 h-8 overflow-hidden shrink-0">
               {imageUrl ? (
-                <img src={imageUrl} alt={symbol} className="w-full h-full object-cover" />
+                <Image src={imageUrl} alt={symbol} width={32} height={32} className="w-full h-full object-cover" unoptimized />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-genius-blue text-white font-bold">
                   {symbol.charAt(0)}
@@ -157,7 +162,7 @@ export function TopBar({
                   <CopyIcon />
                 </button>
               </div>
-              <button type="button" className="text-genius-cream/80 hover:text-genius-cream">
+              <button type="button" onClick={handleShareUrl} className="text-genius-cream/80 hover:text-genius-cream">
                 <ShareIcon />
               </button>
               <StarSmallIcon />
@@ -291,10 +296,13 @@ export function TopBar({
         <div className="relative flex items-center gap-2 shrink-0">
           <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-sm text-sm cursor-pointer border border-genius-blue lg:hover:bg-genius-blue transition-colors">
             <div className="relative overflow-hidden w-[22px] h-[22px]">
-              <img
+              <Image
                 src="https://www.tradegenius.com/static/images/verified.png"
                 alt="verified"
-                className="absolute top-0 left-0 w-full h-full"
+                width={22}
+                height={22}
+                className="absolute top-0 left-0 w-full h-full object-cover"
+                unoptimized
               />
             </div>
           </div>

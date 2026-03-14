@@ -35,11 +35,9 @@ export async function GET(req: NextRequest) {
       { trades, oldestBlock, hasMore: oldestBlock !== undefined },
       { headers: { "Cache-Control": "no-store" } }
     );
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("[/api/trades] error:", err);
-    return NextResponse.json(
-      { error: err?.message ?? "Internal server error" },
-      { status: 500 }
-    );
+    const message = err instanceof Error ? err.message : "Internal server error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

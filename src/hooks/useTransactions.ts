@@ -88,10 +88,10 @@ export function useTransactions(chainId: string, pairAddress: string): UseTransa
         setDeltas(nextDeltas);
         setLoading(false);
         setError(null);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("useTransactions error:", err);
         if (!isMounted) return;
-        setError(err?.message || "Failed to load transactions");
+        setError(err instanceof Error ? err.message : "Failed to load transactions");
         setLoading(false);
       }
     }

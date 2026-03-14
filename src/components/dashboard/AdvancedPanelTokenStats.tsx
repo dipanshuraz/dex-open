@@ -1,28 +1,11 @@
 "use client";
 
-export type TimeframeItem = {
-  label: string;
-  value: string;
-  positive: boolean;
-  active?: boolean;
-};
-
-export type TokenStatsData = {
-  volumeLabel: string;
-  volumeValue: string;
-  buysCount: string;
-  buysValue: string;
-  sellsCount: string;
-  sellsValue: string;
-  volChange: string;
-  volChangePositive: boolean;
-  buyBarPercent: number;
-};
+import type { TimeframeItem, TimeframeKey, TokenStatsData } from "@/types";
 
 type AdvancedPanelTokenStatsProps = {
   stats: TokenStatsData;
   timeframes: TimeframeItem[];
-  onTimeframeSelect?: (label: string) => void;
+  onTimeframeSelect?: (key: TimeframeKey) => void;
 };
 
 export function AdvancedPanelTokenStats({
@@ -87,9 +70,9 @@ export function AdvancedPanelTokenStats({
         >
           {timeframes.map((tf) => (
             <button
-              key={tf.label}
+              key={tf.key}
               type="button"
-              onClick={() => onTimeframeSelect?.(tf.label)}
+              onClick={() => onTimeframeSelect?.(tf.key)}
               className={`
                 flex flex-col justify-center items-center p-1 min-h-0 cursor-pointer
                 transition-colors duration-150

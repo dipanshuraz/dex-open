@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useState, memo } from "react";
+import React, { useCallback, useEffect, useState, memo } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { formatNumber } from "@/lib/utils";
 
@@ -31,11 +32,13 @@ const TrendingTokenItem = memo(function TrendingTokenItem({ token, index }: Toke
     >
       <div className="flex items-center gap-2">
         {token.logo ? (
-          <img
+          <Image
             src={token.logo}
             alt={token.symbol}
-            loading="lazy"
+            width={16}
+            height={16}
             className="w-4 h-4 rounded-full grayscale-[0.2] group-hover/token:grayscale-0 transition-all"
+            unoptimized
           />
         ) : (
           <div className="w-4 h-4 rounded-full bg-black/5 dark:bg-white/5 text-[9px] flex items-center justify-center text-gray-400 font-bold border border-black/10 dark:border-white/10 uppercase">
@@ -43,17 +46,17 @@ const TrendingTokenItem = memo(function TrendingTokenItem({ token, index }: Toke
           </div>
         )}
 
-        <span className="text-[12px] font-bold text-gray-900 dark:text-[#fcfcfd] tracking-[0.01em]">
+        <span className="text-[12px] font-bold text-gray-900 dark:text-foreground-alt tracking-[0.01em]">
           {token.symbol}
         </span>
 
-        <span className="text-[11px] text-[#8a8d9b] font-medium">
+        <span className="text-[11px] text-muted-text font-medium">
           ${formatNumber(token.marketCap)}
         </span>
 
         <div
           className={`flex items-center gap-1 px-1.5 py-0.5 rounded-[3px] text-[10px] font-bold transition-all ${
-            isUp ? "bg-[#064e3b] text-[#22c55e]" : "bg-[#451a1a] text-[#ff4b4b]"
+            isUp ? "bg-green-up-bg text-green-up-text" : "bg-red-down-bg text-red-down-text"
           }`}
         >
           {isUp ? "▲" : "▼"} {Math.abs(token.change24h).toFixed(2)}%
@@ -68,8 +71,8 @@ export default function TrendingBar() {
   const [loading, setLoading] = useState(true);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const fetchTrending = async () => {
-    if (isCollapsed) return; // Skip fetch if collapsed
+  const fetchTrending = useCallback(async () => {
+    if (isCollapsed) return;
     try {
       const res = await fetch("/api/trending");
       const data = await res.json();
@@ -81,7 +84,7 @@ export default function TrendingBar() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [isCollapsed]);
 
   useEffect(() => {
     if (!isCollapsed) {
@@ -89,13 +92,13 @@ export default function TrendingBar() {
     }
     const interval = setInterval(() => {
       if (!isCollapsed) fetchTrending();
-    }, 60000); // 60s refresh
+    }, 60000);
     return () => clearInterval(interval);
-  }, [isCollapsed]);
+  }, [isCollapsed, fetchTrending]);
 
   if (loading && tokens.length === 0) {
     return (
-      <div className="h-9 w-full bg-white dark:bg-[#0D0E12] border-b border-black/10 dark:border-[#221A30] flex items-center px-4 overflow-hidden">
+      <div className="h-9 w-full bg-white dark:bg-surface-panel border-b border-black/10 dark:border-panel-border flex items-center px-4 overflow-hidden">
         <div className="w-4 h-4 border-2 border-purple-500/50 border-t-purple-400 rounded-full animate-spin mr-2" />
         <span className="text-[10px] text-gray-500 font-medium uppercase tracking-widest">Loading Trending...</span>
       </div>
@@ -106,7 +109,7 @@ export default function TrendingBar() {
   const displayTokens = [...tokens, ...tokens];
 
   return (
-    <div className={`group relative w-full bg-white dark:bg-[#070815] border-b border-black/10 dark:border-white/[0.05] z-50 transition-all duration-300 ease-in-out ${
+    <div className={`group relative w-full bg-white dark:bg-surface-dark border-b border-black/10 dark:border-white/[0.05] z-50 transition-all duration-300 ease-in-out ${
       isCollapsed ? "h-0" : "h-9"
     }`}>
       {/* Content Container */}
@@ -114,7 +117,7 @@ export default function TrendingBar() {
         isCollapsed ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}>
         {/* Trending Icon */}
-        <div className="flex items-center px-3 bg-white dark:bg-[#070815] z-10 border-r border-black/10 dark:border-white/5 h-full">
+        <div className="flex items-center px-3 bg-white dark:bg-surface-dark z-10 border-r border-black/10 dark:border-white/5 h-full">
           <svg className="w-3.5 h-3.5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
           </svg>
@@ -133,7 +136,7 @@ export default function TrendingBar() {
       {/* Toggle Button */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className={`absolute left-4 -bottom-4 w-6 h-4 bg-white dark:bg-[#070815] border border-black/10 dark:border-white/10 border-t-0 rounded-b-sm flex items-center justify-center text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all z-[60] shadow-xl group/toggle ${
+        className={`absolute left-4 -bottom-4 w-6 h-4 bg-white dark:bg-surface-dark border border-black/10 dark:border-white/10 border-t-0 rounded-b-sm flex items-center justify-center text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all z-[60] shadow-xl group/toggle ${
           isCollapsed ? "opacity-70 hover:opacity-100" : ""
         }`}
         title={isCollapsed ? "Show Trending" : "Hide Trending"}

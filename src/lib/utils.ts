@@ -34,11 +34,21 @@ export function calculateTimeAgo(timestampInSeconds: number) {
 
 export function truncateAddress(address: string) {
   if (!address) return "";
-  // Show 0x + first 4 hex chars, then last 4 chars
   if (address.startsWith("0x") && address.length > 10) {
-    const prefix = address.slice(0, 2 + 4); // "0x" + 4 chars
+    const prefix = address.slice(0, 2 + 4);
     const suffix = address.slice(-4);
     return `${prefix}...${suffix}`;
   }
   return `${address.slice(0, 4)}...${address.slice(-4)}`;
+}
+
+export function formatPriceChange(value: number | undefined | null): string {
+  if (value == null) return "--";
+  const sign = value >= 0 ? "+" : "";
+  return `${sign}${value.toFixed(2)}%`;
+}
+
+export function formatCompactNumber(value: number): string {
+  if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
+  return String(value);
 }

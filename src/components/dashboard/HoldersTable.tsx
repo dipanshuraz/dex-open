@@ -85,7 +85,6 @@ export function HoldersTable({
                       const isPink = idx < filledSegments / 2;
                       return (
                         <div
-                          // eslint-disable-next-line react/no-array-index-key
                           key={idx}
                           className={`h-full rounded-[1px] ${
                             filled
