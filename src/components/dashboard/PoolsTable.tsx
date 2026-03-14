@@ -48,7 +48,6 @@ function PoolRow({ pool, now }: { pool: Pool; now: number }) {
       exit={{ opacity: 0 }}
       className="grid grid-cols-7 items-center px-4 py-2.5 hover:bg-genius-blue/40 transition-colors border-b border-genius-blue text-sm leading-5 font-medium font-sans text-genius-cream overflow-hidden gap-x-3 w-full max-w-full"
     >
-      {/* Pool / Dex */}
       <div className="flex items-center gap-2 truncate w-full text-left">
         <span className="text-lg">{dexIcon}</span>
         <span>{dexName}</span>
@@ -71,7 +70,6 @@ function PoolRow({ pool, now }: { pool: Pool; now: number }) {
         </a>
       </div>
 
-      {/* Pair */}
       <div className="flex items-center gap-2 truncate w-full text-left">
         <span>{pool.pair}</span>
         <button
@@ -93,27 +91,22 @@ function PoolRow({ pool, now }: { pool: Pool; now: number }) {
         </a>
       </div>
 
-      {/* Price / Mark Price Diff – static placeholder */}
       <div className="truncate w-full text-left text-genius-cream/60">
         Coming Soon
       </div>
 
-      {/* Backing Asset Liquidity */}
       <div className="truncate w-full text-left">
         {formatNumber(pool.liquidity)}
       </div>
 
-      {/* Volume (24h) */}
       <div className="truncate w-full text-left">
         ${formatNumber(pool.volume)}
       </div>
 
-      {/* Age */}
       <div className="truncate w-full text-left text-genius-cream/70">
         {ageStr}
       </div>
 
-      {/* Buy / Sell – static placeholder */}
       <div className="truncate w-full text-left text-genius-cream/60">
         Coming Soon
       </div>
@@ -133,7 +126,6 @@ export function PoolsTable({
 
   return (
     <div className="absolute inset-0 flex flex-col font-sans bg-genius-indigo text-genius-cream">
-      {/* Table Header – same design as TradesTable */}
       <header className="sticky top-0 z-10 w-full shrink-0">
         <div className="grid grid-cols-7 w-full px-5 py-1.5 bg-genius-blue/50 items-center gap-2">
           <div className="text-genius-cream/60 whitespace-nowrap text-xs">Pool</div>
@@ -146,7 +138,6 @@ export function PoolsTable({
         </div>
       </header>
 
-      {/* Table Body */}
       <div className="flex-1 overflow-y-auto custom-scrollbar relative">
         {loading && pools.length === 0 ? (
           <div className="absolute inset-0 flex items-center justify-center text-genius-cream/60 text-xs">

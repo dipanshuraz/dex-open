@@ -29,7 +29,6 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "exited", label: "Exited" },
 ];
 
-/** Headers for tabs that show empty state (Position, Traders, Orders, History, Exited) */
 const POSITION_HEADERS = [
   { label: "Ticker", sortable: true },
   { label: "Balance", sortable: true },
@@ -67,7 +66,6 @@ export function TabbedPanel({
 
   return (
     <div className="h-full flex flex-col bg-genius-indigo border-t border-r border-genius-blue">
-      {/* Tab bar + action bar: single row, justify-between, 45px height */}
       <div className="flex justify-between items-center gap-2 pl-3 min-h-[45px] h-[45px] shrink-0 border-b border-genius-blue/80 bg-genius-indigo">
         <div className="flex items-center gap-1 shrink-0 overflow-x-auto scrollbar-hide">
           {TABS.map((tab) => {
@@ -132,7 +130,6 @@ export function TabbedPanel({
         </div>
       </div>
 
-      {/* Table headers for empty-state tabs (Position, Traders, Orders, History, Exited) – same design as TradesTable */}
       {showEmptyState && (
         <header className="sticky top-0 z-10 w-full shrink-0">
           <div className="grid grid-cols-[1fr_1fr_0.8fr_1fr_0.8fr_1fr_1fr_auto] w-full px-5 py-1.5 bg-genius-blue/50 items-center gap-2">
@@ -156,7 +153,6 @@ export function TabbedPanel({
         </header>
       )}
 
-      {/* Tab content */}
       <div className="flex-1 overflow-hidden relative min-h-0">
         {showTrades && (
           <TradesTable chainId={chainId} tokenAddress={tokenAddress} marketCap={marketCap} />

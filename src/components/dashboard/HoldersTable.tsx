@@ -37,8 +37,8 @@ export function HoldersTable({
             {[1, 2, 3, 4, 5].map((i) => (
               <div
                 key={i}
-                className="h-[54px] w-full bg-black/5 dark:bg-white/5 animate-pulse rounded"
-              ></div>
+                className="h-[54px] w-full bg-genius-blue/20 animate-pulse rounded"
+              />
             ))}
           </div>
         )}
@@ -56,9 +56,8 @@ export function HoldersTable({
                 key={holder.address}
                 className="flex flex-row w-full px-5 py-2.5 h-[54px] items-center transition-colors hover:bg-genius-blue cursor-pointer border-b border-genius-blue/50"
               >
-                {/* Rank + Address */}
                 <div className="w-[calc(25%-1rem)] flex items-center gap-2 min-w-0">
-                  <div className="text-sm text-[#e5ca7c] shrink-0">
+                  <div className="text-sm text-genius-rank shrink-0">
                     <span className="opacity-50">#</span>
                     {holder.rank}
                   </div>
@@ -72,14 +71,12 @@ export function HoldersTable({
                   </button>
                 </div>
 
-                {/* Percentage */}
                 <div className="w-[60px] flex flex-col text-right shrink-0">
                   <span className="text-sm">
                     {holder.percentage !== null ? `${holder.percentage.toFixed(2)}%` : "—"}
                   </span>
                 </div>
 
-                {/* Amount + progress bar + amount */}
                 <div className="w-[calc(50%-1rem)] flex justify-end items-center gap-2 min-w-0">
                   <span className="text-sm shrink-0">{formatNumber(holder.balance)}</span>
                   <div className="flex flex-row shrink-0" style={{ height: 12, gap: 1 }}>
@@ -105,7 +102,6 @@ export function HoldersTable({
                   <span className="text-sm shrink-0">{formatNumber(holder.balance)}</span>
                 </div>
 
-                {/* Value */}
                 <div className="w-[100px] ml-auto flex flex-col text-right shrink-0">
                   <span className="text-sm">
                     {holder.valueUsd != null ? formatCurrency(holder.valueUsd) : "—"}

@@ -14,13 +14,11 @@ export function GlobalSearch() {
     const q = value.trim();
     if (!q) return;
 
-    // If user pasted a 0x address, assume Ethereum token and navigate directly.
     if (q.startsWith("0x") && q.length > 10) {
       router.push(`/ethereum/${q}`);
       return;
     }
 
-    // Otherwise, use Dexscreener search to resolve a pair and navigate.
     try {
       setLoading(true);
       const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
@@ -33,7 +31,7 @@ export function GlobalSearch() {
       }
       router.push(`/${pair.chainId}/${pair.baseToken.address}`);
     } catch {
-      // best-effort search; silently fail for now
+      /* no-op */
     } finally {
       setLoading(false);
     }

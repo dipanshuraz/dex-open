@@ -28,7 +28,7 @@ export default function RootLayout({
         >
           <div className="dark">
             <QueryProvider>
-              <div className="flex flex-col h-screen overflow-hidden bg-[#09001A]">
+              <div className="flex flex-col h-screen overflow-hidden bg-background">
                 <Header />
                 <main className="flex-1 min-h-0 pt-[var(--navbar-height)] pb-14 text-white overflow-hidden transition-[padding-top] duration-300 ease-in-out">
                   {children}

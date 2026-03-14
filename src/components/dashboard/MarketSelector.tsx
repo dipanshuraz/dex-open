@@ -17,7 +17,6 @@ export function MarketSelector({ chainId, tokenAddress, onPoolSelect }: Props) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // Read ?pool= from the URL on initial render (e.g. ?pool=uniswap)
   const initialDexId = searchParams.get("pool") ?? undefined;
 
   const { markets, selected, setSelected, loading, error } = useMarkets(
@@ -30,7 +29,6 @@ export function MarketSelector({ chainId, tokenAddress, onPoolSelect }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
@@ -39,7 +37,6 @@ export function MarketSelector({ chainId, tokenAddress, onPoolSelect }: Props) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  // Auto-focus search when dropdown opens
   useEffect(() => {
     if (open) {
       setSearch("");
@@ -47,7 +44,6 @@ export function MarketSelector({ chainId, tokenAddress, onPoolSelect }: Props) {
     }
   }, [open]);
 
-  // Notify parent when selection changes
   useEffect(() => {
     if (selected) onPoolSelect?.(selected.pairAddress);
   }, [selected, onPoolSelect]);
@@ -56,7 +52,6 @@ export function MarketSelector({ chainId, tokenAddress, onPoolSelect }: Props) {
     setSelected(m);
     setOpen(false);
 
-    // Keep URL in sync so any pool selection becomes a shareable link
     const params = new URLSearchParams(searchParams.toString());
     params.set("pool", m.dexId);
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
@@ -84,7 +79,6 @@ export function MarketSelector({ chainId, tokenAddress, onPoolSelect }: Props) {
 
   return (
     <div ref={ref} className="relative">
-      {/* Trigger: genius theme – pair label + liquidity + chevron */}
       <button
         onClick={() => setOpen((v) => !v)}
         className="group flex items-center gap-2 px-2 py-[7px] rounded-sm border border-genius-blue bg-transparent hover:brightness-95 transition-all text-sm text-genius-cream cursor-pointer"
@@ -99,7 +93,6 @@ export function MarketSelector({ chainId, tokenAddress, onPoolSelect }: Props) {
         />
       </button>
 
-      {/* Dropdown */}
       {open && (
         <div className="absolute right-0 top-full mt-1 z-50 w-72 rounded-lg bg-genius-indigo border border-genius-blue shadow-xl overflow-hidden">
           <div className="px-3 py-2 border-b border-genius-blue text-[10px] uppercase tracking-widest text-genius-cream/60 font-semibold">

@@ -42,13 +42,13 @@ export function TopBar({
 
   if (loading) {
     return (
-      <div className="h-16 w-full animate-pulse bg-white dark:bg-[#171821] border-b border-black/5 dark:border-white/5" />
+      <div className="h-16 w-full animate-pulse bg-white dark:bg-skeleton border-b border-genius-blue/50" />
     );
   }
 
   if (error || !metadata) {
     return (
-      <div className="h-16 w-full bg-red-500/10 text-red-500 flex items-center justify-center border-b border-black/5 dark:border-white/5 text-sm">
+      <div className="h-16 w-full bg-genius-red/10 text-genius-red flex items-center justify-center border-b border-genius-blue/50 text-sm">
         Error Loading Pair Data
       </div>
     );
@@ -129,13 +129,10 @@ export function TopBar({
 
   return (
     <div className="group relative flex items-center py-2.5 bg-genius-indigo border-b border-genius-blue text-xs font-sans text-genius-cream w-full min-w-0">
-      {/* Edge gradients for horizontal scroll hint */}
       <div className="absolute left-0 top-0 bottom-0 w-6 bg-linear-to-r from-genius-indigo to-transparent z-10 pointer-events-none" />
       <div className="absolute right-0 top-0 bottom-0 w-6 bg-linear-to-l from-genius-indigo to-transparent z-10 pointer-events-none" />
 
-      {/* Scrollable content row – constrained to parent (left panel) width */}
       <div className="flex items-center gap-6 sm:gap-8 pl-3 pr-4 sm:pl-4 sm:pr-5 overflow-x-auto overflow-y-hidden w-full min-w-0">
-        {/* Token + socials + price */}
         <div className="flex flex-row items-center gap-3 shrink-0">
           <div className="flex items-center gap-3 relative group/tokenimage">
             <div className="relative rounded-md border border-genius-blue/80 w-8 h-8 overflow-hidden shrink-0">
@@ -204,15 +201,14 @@ export function TopBar({
           </div>
         </div>
 
-        {/* Price + 24h change */}
         <div className="flex flex-col whitespace-nowrap shrink-0">
           <div className="flex flex-row items-center gap-2 min-w-[120px]">
             <span
               className={`text-lg font-bold tracking-tight text-genius-cream transition-all duration-300 ${
                 priceFlash === "up"
-                  ? "drop-shadow-[0_0_14px_rgba(52,211,153,0.9)] scale-[1.03]"
+                  ? "shadow-flash-green scale-[1.03]"
                   : priceFlash === "down"
-                  ? "drop-shadow-[0_0_14px_rgba(248,113,113,0.9)] scale-[1.03]"
+                  ? "shadow-flash-red scale-[1.03]"
                   : ""
               }`}
             >
@@ -240,7 +236,6 @@ export function TopBar({
           </div>
         </div>
 
-        {/* Stat items – flexible min-width, no fixed width to avoid truncation */}
         <div className="flex flex-col whitespace-nowrap shrink-0">
           <div className="text-genius-cream/65 text-xs whitespace-nowrap">Volume</div>
           <div className="text-genius-cream text-sm min-w-0 truncate max-w-[80px]" title={formatNumber(metadata.volume?.h24 ?? 0)}>
@@ -287,7 +282,6 @@ export function TopBar({
           </div>
         </div>
 
-        {/* Settings / network / verified */}
         <button
           type="button"
           className="hover:opacity-70 transition-opacity cursor-pointer flex items-center justify-center shrink-0"

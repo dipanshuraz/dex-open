@@ -32,7 +32,6 @@ export function AdvancedPanelTokenStats({
 }: AdvancedPanelTokenStatsProps) {
   return (
     <div className="relative group">
-      {/* Stats row: visible by default; hidden when overlay is shown */}
       <div
         className="min-h-0 flex flex-col justify-center gap-2 bg-genius-indigo border-b border-genius-blue px-4 pt-[0.55rem] pb-[0.65rem] overflow-hidden transition-opacity duration-200 group-hover:opacity-0 group-hover:pointer-events-none"
         data-sentry-component="AdvancedPanelTokenStats"
@@ -77,7 +76,6 @@ export function AdvancedPanelTokenStats({
         </div>
       </div>
 
-      {/* Timeframes overlay: hidden by default, shown on hover; sits on top */}
       <div
         className="absolute inset-0 z-10 flex flex-col justify-center bg-genius-indigo border-b border-genius-blue opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-100 group-hover:pointer-events-auto"
         aria-hidden

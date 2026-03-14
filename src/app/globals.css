@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @custom-variant dark (&:is(.dark *));
 
-/* Single :root – no duplicates; Tailwind v4 generates utilities at build time */
 :root {
   --background: #09001a;
   --foreground: #ededed;
@@ -37,6 +36,7 @@
   --genius-red: 0 91% 71%;
   --genius-yellow: 36 100% 64%;
   --genius-yellow-light: 44 90% 56%;
+  --genius-rank: 43 74% 66%;
   --genius-purple-light: 259 59% 66%;
   --genius-purple: 259 52% 50%;
   --genius-purple-dark: 257 51% 25%;
@@ -51,12 +51,29 @@
   --sidebar-accent-foreground: 240 4.8% 95.9%;
   --sidebar-border: 240 3.7% 15.9%;
   --sidebar-ring: 217.2 91.2% 59.8%;
+  --skeleton-bg: #171821;
+  --card-gradient-from: #11121a;
+  --card-gradient-to: #060612;
+  --card-shadow: 0 0 40px rgba(88, 28, 135, 0.25);
+  --chart-bg: #09001a;
+  --chart-text: #a3b1d1;
+  --chart-grid: rgba(95, 106, 164, 0.25);
+  --chart-border: rgba(148, 163, 253, 0.35);
+  --chart-crosshair: #9f7aea;
+  --chart-crosshair-bg: #1a1625;
+  --chart-up: #00c46a;
+  --chart-down: #ff4b5c;
+  --chart-wick-up: #00e387;
+  --chart-wick-down: #ff6473;
+  --shadow-flash-green: 0 0 14px rgba(52, 211, 153, 0.9);
+  --shadow-flash-red: 0 0 14px rgba(248, 113, 113, 0.9);
 }
 
 @theme inline {
   --font-sans: Sans;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-skeleton: var(--skeleton-bg);
   --color-genius-indigo: hsl(var(--genius-indigo));
   --color-genius-indigo-foreground: hsl(var(--genius-indigo-foreground));
   --color-genius-blue: hsl(var(--genius-blue));
@@ -70,6 +87,7 @@
   --color-genius-red: hsl(var(--genius-red));
   --color-genius-yellow: hsl(var(--genius-yellow));
   --color-genius-yellow-light: hsl(var(--genius-yellow-light));
+  --color-genius-rank: hsl(var(--genius-rank));
   --color-genius-purple-light: hsl(var(--genius-purple-light));
   --color-genius-purple: hsl(var(--genius-purple));
   --color-genius-purple-dark: hsl(var(--genius-purple-dark));
@@ -82,7 +100,7 @@ html {
 
 body {
   margin: 0;
-  background-color: #09001a;
+  background-color: var(--background);
   color: var(--foreground);
   font-family: Sans;
   font-weight: 500;
@@ -96,7 +114,6 @@ body {
   box-sizing: border-box;
 }
 
-/* Hide scrollbars app-wide; scroll still works */
 * {
   scrollbar-width: none !important;
   -ms-overflow-style: none;
@@ -152,6 +169,21 @@ body {
   }
   .genius-shadow {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  }
+  .shadow-flash-green {
+    box-shadow: var(--shadow-flash-green);
+  }
+  .shadow-flash-red {
+    box-shadow: var(--shadow-flash-red);
+  }
+  .bg-card-gradient {
+    background-image: linear-gradient(to bottom, var(--card-gradient-from), var(--card-gradient-to));
+  }
+  .shadow-card {
+    box-shadow: var(--card-shadow);
+  }
+  .conic-pink {
+    background: conic-gradient(hsl(var(--genius-pink)) 20deg, transparent 120deg);
   }
 }
 

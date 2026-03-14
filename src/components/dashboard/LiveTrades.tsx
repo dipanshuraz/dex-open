@@ -31,7 +31,6 @@ export function LiveTrades({ chainId, pairAddress }: LiveTradesProps) {
 
   return (
     <div className="h-full flex flex-col bg-genius-indigo border-t border-l border-genius-blue overflow-hidden">
-      {/* Top tabs + controls – mimic Genius trades header */}
       <div className="flex justify-between items-center gap-2 pl-3 pr-4 min-h-[45px] h-[45px] border-b border-genius-blue bg-genius-indigo">
         <div className="flex items-center gap-1">
           <button className="cursor-pointer transition-colors text-genius-cream bg-genius-blue rounded-sm px-2 py-0.5 text-sm">
@@ -111,7 +110,6 @@ export function LiveTrades({ chainId, pairAddress }: LiveTradesProps) {
         </div>
       ) : (
         <div className="flex-1 w-full h-full flex flex-col font-mono text-xs">
-          {/* Table header – Genius-style */}
           <div className="flex flex-row w-full px-5 py-1.5 bg-genius-blue/50">
             <div className="w-1/6 text-genius-cream/60 whitespace-nowrap text-xs">
               <div className="w-fit flex items-center gap-1 cursor-pointer hover:opacity-70 transition-opacity">
@@ -152,14 +150,12 @@ export function LiveTrades({ chainId, pairAddress }: LiveTradesProps) {
                     key={key}
                     className="relative flex flex-row w-full px-5 py-2.5 h-[38px] items-center transition-colors hover:bg-genius-blue cursor-pointer overflow-hidden border-b border-genius-blue/60 last:border-b-0"
                   >
-                    {/* Period */}
                     <div className="w-1/6 flex flex-col relative z-10">
                       <div className="text-sm text-genius-cream/80 font-sans">
                         {label}
                       </div>
                     </div>
 
-                    {/* Buys */}
                     <div className="w-1/6 flex flex-col relative z-10">
                       <div className="text-sm text-genius-green flex items-center gap-1">
                         <TrendingUp className="w-3 h-3" />
@@ -167,7 +163,6 @@ export function LiveTrades({ chainId, pairAddress }: LiveTradesProps) {
                       </div>
                     </div>
 
-                    {/* Sells */}
                     <div className="w-1/6 flex flex-col relative z-10">
                       <div className="text-sm text-genius-red flex items-center gap-1">
                         <TrendingDown className="w-3 h-3" />
@@ -175,7 +170,6 @@ export function LiveTrades({ chainId, pairAddress }: LiveTradesProps) {
                       </div>
                     </div>
 
-                    {/* Buy % */}
                     <div className="w-1/6 flex flex-col relative z-10">
                       <div
                         className={`text-sm ${
@@ -186,7 +180,6 @@ export function LiveTrades({ chainId, pairAddress }: LiveTradesProps) {
                       </div>
                     </div>
 
-                    {/* Volume with gradient bar */}
                     <div className="w-2/6 flex flex-col relative z-10">
                       <div className="relative">
                         <div className="text-sm text-genius-cream">
@@ -208,7 +201,6 @@ export function LiveTrades({ chainId, pairAddress }: LiveTradesProps) {
             })()}
           </div>
 
-          {/* Footer / live status */}
           <div className="px-5 py-2.5 bg-genius-blue/60 border-t border-genius-blue flex items-center justify-between text-[10px] font-sans text-genius-cream/70">
             <span className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-genius-green animate-pulse" />

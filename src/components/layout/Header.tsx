@@ -9,7 +9,7 @@ import { formatNumber } from "@/lib/utils";
 import { TrendingFlameIcon } from "@/components/icons/TrendingFlameIcon";
 import { StarIcon } from "@/components/icons/StarIcon";
 import { ClockIcon } from "@/components/icons/ClockIcon";
-import { Search, ClipboardList, Bell, ChevronDown, Cog, X, UserCog } from "lucide-react";
+import { Search, ClipboardList, ChevronDown } from "lucide-react";
 import { GlobalSearch } from "@/components/dashboard/GlobalSearch";
 import { Switch } from "@/components/ui/Switch";
 
@@ -33,7 +33,6 @@ const Header = () => {
   const { tokens, loading } = useTrendingTokens();
   const displayTokens = tokens.slice(0, 20);
   const [isTrendingCollapsed, setIsTrendingCollapsed] = useState(false);
-  const [notifOpen, setNotifOpen] = useState(false);
   const [trendingTimeframe, setTrendingTimeframe] = useState("24H");
   const [networkToggles, setNetworkToggles] = useState<Record<string, boolean>>(
     () => Object.fromEntries(TRENDING_NETWORKS.map((n) => [n.id, true]))
@@ -51,7 +50,6 @@ const Header = () => {
 
   return (
     <header className="z-[100] fixed top-0 left-0 right-0 flex flex-col bg-genius-indigo shrink-0">
-      {/* Top row – always visible (collapsed = only this row) */}
       <div className="flex justify-between items-center border-b border-genius-blue px-4 py-2.5">
         <div className="flex items-center gap-3 pl-2">
           <Link href="/">
@@ -81,14 +79,13 @@ const Header = () => {
               </div>
             ))}
 
-            {/* Airdrop pill */}
             <div className="relative">
               <Link href={MAIN_NAV_ITEMS[7]?.href ?? "/points/you"}>
                 <div className="text-sm px-2.5 py-1 rounded-sm hover:text-genius-pink transition-colors flex items-center gap-1">
                   <div className="flex items-center gap-2 relative h-2 w-2 cursor-pointer">
                     <div className="cursor-pointer z-999 absolute w-[100px] h-[20px] mx-auto flex max-w-lg items-center justify-center rounded-full">
                       <div className="relative z-10 flex w-full cursor-pointer items-center overflow-hidden rounded-full border border-genius-pink/20 p-[1.5px]">
-                        <div className="animate-rotate absolute inset-0 h-full w-full rounded-full bg-[conic-gradient(#FFA3C8_20deg,transparent_120deg)]" />
+                        <div className="animate-rotate absolute inset-0 h-full w-full rounded-full conic-pink" />
                         <div className="text-sm relative z-20 flex w-full rounded-full bg-linear-to-b from-genius-blue to-genius-indigo px-2 py-1.5 gap-2 items-center">
                           <div className="relative overflow-hidden" style={{ width: 18, height: 18, minWidth: 18, minHeight: 18 }}>
                             <Image
@@ -127,12 +124,9 @@ const Header = () => {
             </div>
           </div>
 
-          <input id="search-input" placeholder="Search" className="hidden" readOnly aria-hidden />
-
         </div>
       </div>
 
-      {/* Trending row – visible by default, can be collapsed via toggle */}
       <div
         className={`flex flex-col bg-genius-indigo overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${
           isTrendingCollapsed
@@ -253,7 +247,6 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Expand/collapse toggle */}
       <button
         type="button"
         onClick={() => setIsTrendingCollapsed((prev) => !prev)}

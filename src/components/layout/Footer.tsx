@@ -137,7 +137,6 @@ export function Footer() {
 
   return (
     <footer className="z-100 fixed bottom-0 left-0 right-0 flex justify-between items-center bg-genius-indigo border-t border-genius-blue py-2 px-4">
-      {/* Left: status + actions */}
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-2 bg-genius-green/20 text-sm text-genius-green rounded-sm px-2.5 py-1 cursor-default">
           <div className="w-1.5 h-1.5 bg-genius-green rounded-full animate-pulse" />
@@ -183,7 +182,6 @@ export function Footer() {
         </button>
       </div>
 
-      {/* Right: scrollable ticker + ellipsis */}
       <div className="relative flex items-center">
         <div className="absolute z-10 left-0 top-0 bottom-0 w-6 bg-linear-to-r from-genius-indigo to-transparent pointer-events-none" />
         <div className="absolute z-10 right-4 top-0 bottom-0 w-6 bg-linear-to-l from-genius-indigo to-transparent pointer-events-none" />
@@ -202,7 +200,6 @@ export function Footer() {
         </button>
       </div>
 
-      {/* MAJOR TICKERS popup */}
       <div
         className={`absolute bottom-12 right-0 w-[360px] genius-shadow flex flex-col gap-2 bg-genius-indigo border border-genius-blue rounded-md py-3 px-4 transition-opacity ${
           tickerPopupOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"

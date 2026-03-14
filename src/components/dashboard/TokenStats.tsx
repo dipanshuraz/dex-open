@@ -12,7 +12,6 @@ import { truncateAddress } from "@/lib/utils";
 import { useHolders } from "@/hooks/useHolders";
 import { useTokenProfile } from "@/hooks/useTokenProfile";
 
-/* Inline SVGs from reference – UserStar, ChefHat, HatGlasse, Virus, DexPayment, UsersRound, Slash */
 function UserStarIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -194,7 +193,6 @@ export function TokenStats({
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      {/* Header – collapsible */}
       <button
         type="button"
         onClick={() => setIsExpanded((e) => !e)}
@@ -240,7 +238,6 @@ export function TokenStats({
             </div>
           </div>
 
-          {/* CA */}
           <div className="flex items-center justify-between px-3 py-2 border border-genius-blue rounded-sm hover:opacity-70 transition-opacity cursor-pointer">
             <div className="flex items-center gap-1 text-xs">
               <FileText className="w-3.5 h-3.5 opacity-50 shrink-0" aria-hidden />
@@ -252,7 +249,6 @@ export function TokenStats({
             />
           </div>
 
-          {/* DA – deployer with disabled chef-hat + external link */}
           <div className="flex items-center justify-between px-3 py-2 border border-genius-blue rounded-sm hover:opacity-70 transition-opacity cursor-pointer">
             <div className="flex items-center gap-1 text-xs">
               <ChefHatIcon className="size-3.5 opacity-50 shrink-0" />
