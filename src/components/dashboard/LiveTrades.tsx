@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { useTradeStats } from "@/hooks/useLatestTxs";
 import { formatNumber } from "@/lib/utils";
+import { Switch } from "@/components/ui/Switch";
 import {
   TrendingUp,
   TrendingDown,
@@ -24,6 +26,7 @@ const PERIODS = [
 ];
 
 export function LiveTrades({ chainId, pairAddress }: LiveTradesProps) {
+  const [btcOnly, setBtcOnly] = useState(false);
   const { stats, loading, error } = useTradeStats(chainId, pairAddress);
 
   return (
@@ -62,37 +65,28 @@ export function LiveTrades({ chainId, pairAddress }: LiveTradesProps) {
           <div className="absolute top-0 right-0 w-3 h-full bg-linear-to-l from-genius-indigo to-transparent z-10 pointer-events-none" />
 
           <div className="flex items-center gap-3 overflow-x-auto px-3">
-            <button className="inline-flex items-center justify-center whitespace-nowrap rounded-sm text-md ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 border border-genius-blue gap-1.5 py-[3px] px-2 lg:text-xs">
+            <button className="inline-flex p-4 items-center justify-center whitespace-nowrap rounded-sm text-md lg:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 gap-2 py-[3px] px-2 bg-genius-pink/20 text-genius-pink">
               Trades Panel
               <PanelRightClose className="w-3.5 h-3.5" aria-hidden="true" />
             </button>
 
             <div className="flex flex-row items-center gap-1.5">
-              <div className="text-xs text-genius-cream cursor-pointer hover:text-genius-cream/80 transition-colors select-none whitespace-nowrap">
+              <span className="text-xs text-genius-pink cursor-pointer hover:opacity-80 transition-opacity select-none whitespace-nowrap">
                 BTC Only
-              </div>
-              <div className="flex items-center">
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked="false"
-                  data-state="unchecked"
-                  className="peer inline-flex shrink-0 cursor-pointer items-center border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-genius-pink data-[state=unchecked]:bg-genius-blue h-4 w-[28px] rounded-[2px]"
-                >
-                  <span
-                    data-state="unchecked"
-                    className="pointer-events-none block bg-background shadow-lg ring-3 data-[state=checked]:ring-genius-blue data-[state=unchecked]:ring-genius-pink transition-transform data-[state=unchecked]:bg-genius-pink data-[state=checked]:bg-genius-blue data-[state=unchecked]:translate-x-0 h-3 w-3 rounded-[2px] data-[state=checked]:translate-x-[12px]"
-                  />
-                </button>
-              </div>
+              </span>
+              <Switch
+                checked={btcOnly}
+                onCheckedChange={setBtcOnly}
+                aria-label="Toggle BTC Only"
+              />
             </div>
 
-            <button className="inline-flex items-center justify-center whitespace-nowrap rounded-sm text-md ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 border border-genius-blue gap-1.5 py-[3px] px-2 lg:text-xs">
+            <button className="inline-flex p-4 items-center justify-center whitespace-nowrap rounded-sm text-md lg:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 gap-2 py-[3px] px-2 bg-genius-pink/20 text-genius-pink">
               Filter
               <Filter className="w-3.5 h-3.5" aria-hidden="true" />
             </button>
 
-            <button className="inline-flex items-center justify-center whitespace-nowrap rounded-sm text-md ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 gap-1.5 lg:text-xs py-1 px-2 bg-genius-pink/20 text-genius-pink">
+            <button className="inline-flex p-4 items-center justify-center whitespace-nowrap rounded-sm text-md lg:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 gap-2 py-[3px] px-2 bg-genius-pink/20 text-genius-pink">
               <Zap className="w-3.5 h-3.5" aria-hidden="true" />
               Instant Trade
             </button>

@@ -32,9 +32,9 @@ export function AdvancedPanelTokenStats({
 }: AdvancedPanelTokenStatsProps) {
   return (
     <div className="relative group">
-      {/* First row: token stats – visible by default (image 2) */}
+      {/* Stats row: visible by default; hidden when overlay is shown */}
       <div
-        className="min-h-0 flex flex-col justify-center gap-2 bg-genius-indigo border-b border-genius-blue px-4 pt-[0.55rem] pb-[0.65rem] overflow-hidden"
+        className="min-h-0 flex flex-col justify-center gap-2 bg-genius-indigo border-b border-genius-blue px-4 pt-[0.55rem] pb-[0.65rem] overflow-hidden transition-opacity duration-200 group-hover:opacity-0 group-hover:pointer-events-none"
         data-sentry-component="AdvancedPanelTokenStats"
         data-sentry-source-file="AdvancedPanelTokenStats.tsx"
       >
@@ -77,13 +77,13 @@ export function AdvancedPanelTokenStats({
         </div>
       </div>
 
-      {/* Hover overlay: timeframes (image 3) – visible on group hover */}
+      {/* Timeframes overlay: hidden by default, shown on hover; sits on top */}
       <div
-        className="absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto bg-genius-indigo"
+        className="absolute inset-0 z-10 flex flex-col justify-center bg-genius-indigo border-b border-genius-blue opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-100 group-hover:pointer-events-auto"
         aria-hidden
       >
         <div
-          className="grid grid-cols-4 divide-x divide-genius-blue border border-genius-blue h-full border-b border-t-0 border-x-0"
+          className="grid grid-cols-4 divide-x divide-genius-blue border-t border-genius-blue flex-1 min-h-0"
           data-sentry-component="AdvancedOverviewTimeframes"
           data-sentry-source-file="AdvancedOverviewTimeframes.tsx"
         >
@@ -92,11 +92,16 @@ export function AdvancedPanelTokenStats({
               key={tf.label}
               type="button"
               onClick={() => onTimeframeSelect?.(tf.label)}
-              className={`flex flex-col justify-center items-center p-1 min-h-0 transition-colors cursor-pointer ${
-                tf.active ? "bg-genius-blue" : "bg-genius-indigo hover:bg-[#140b30]"
-              }`}
+              className={`
+                flex flex-col justify-center items-center p-1 min-h-0 cursor-pointer
+                transition-colors duration-150
+                ${tf.active
+                  ? "bg-genius-blue text-genius-cream ring-inset ring-1 ring-genius-cream/20"
+                  : "bg-genius-indigo text-genius-cream/80 hover:bg-genius-blue/40 hover:text-genius-cream"
+                }
+              `}
             >
-              <div className="text-[10px] text-genius-cream/60 uppercase">{tf.label}</div>
+              <div className="text-[10px] uppercase">{tf.label}</div>
               <div
                 className={`text-xs ${tf.positive ? "text-genius-green" : "text-genius-red"}`}
               >

@@ -11,6 +11,7 @@ import {
   Languages,
   MoreHorizontal,
 } from "lucide-react";
+import { Switch } from "@/components/ui/Switch";
 
 const BASE_IMG = "https://www.tradegenius.com/static/geniusImages";
 
@@ -126,13 +127,13 @@ function TickerChip({ ticker, compact = false }: { ticker: TickerItem; compact?:
   );
 }
 
-const VISIBLE_TICKERS = MAJOR_TICKERS.slice(0, 3);
-
 export function Footer() {
   const [tickerPopupOpen, setTickerPopupOpen] = useState(false);
   const [tickerVisible, setTickerVisible] = useState<Record<string, boolean>>(
     Object.fromEntries(MAJOR_TICKERS.map((t) => [t.symbol, ["BTC", "ETH", "SOL"].includes(t.symbol)]))
   );
+
+  const footerTickers = MAJOR_TICKERS.filter((t) => tickerVisible[t.symbol]);
 
   return (
     <footer className="z-100 fixed bottom-0 left-0 right-0 flex justify-between items-center bg-genius-indigo border-t border-genius-blue py-2 px-4">
@@ -145,35 +146,35 @@ export function Footer() {
         </div>
         <button
           type="button"
-          className="inline-flex items-center justify-center whitespace-nowrap rounded-sm text-md lg:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 gap-2 py-[3px] px-2 bg-genius-pink/20 text-genius-pink"
+          className="inline-flex p-4 items-center justify-center whitespace-nowrap rounded-sm text-md lg:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 gap-2 py-[3px] px-2 bg-genius-pink/20 text-genius-pink"
         >
           <Settings2 className="w-3.5 h-3.5" aria-hidden />
           Trading Settings
         </button>
         <button
           type="button"
-          className="inline-flex items-center justify-center whitespace-nowrap rounded-sm text-md lg:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 border border-genius-blue gap-2 py-[3px] px-2"
+          className="inline-flex p-4 items-center justify-center whitespace-nowrap rounded-sm text-md lg:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 px-2 gap-2 bg-genius-indigo border border-genius-blue py-[3px]"
         >
-          <Headphones className="w-3.5 h-3.5" aria-hidden />
+          <Headphones className="w-4 h-4" aria-hidden />
           Help
         </button>
         <button
           type="button"
-          className="inline-flex items-center justify-center whitespace-nowrap rounded-sm text-md lg:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 border border-genius-blue gap-2 py-[3px] px-2"
+          className="inline-flex p-4 items-center justify-center whitespace-nowrap rounded-sm text-md lg:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 px-2 gap-2 bg-genius-indigo border border-genius-blue py-[3px]"
         >
-          <BookOpenText className="w-3.5 h-3.5" aria-hidden />
+          <BookOpenText className="w-4 h-4" aria-hidden />
           Docs
         </button>
         <button
           type="button"
-          className="inline-flex items-center justify-center whitespace-nowrap rounded-sm text-md lg:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 border border-genius-blue gap-2 py-[3px] px-2"
+          className="inline-flex p-4 items-center justify-center whitespace-nowrap rounded-sm text-md lg:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 px-2 gap-2 bg-genius-indigo border border-genius-blue py-[3px]"
         >
-          <Percent className="w-3.5 h-3.5" aria-hidden />
+          <Percent className="w-4 h-4" aria-hidden />
           PnL
         </button>
         <button
           type="button"
-          className="inline-flex items-center justify-center whitespace-nowrap rounded-sm text-md lg:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 px-2 gap-2 bg-genius-indigo border border-genius-blue py-[3px]"
+          className="inline-flex p-4 items-center justify-center whitespace-nowrap rounded-sm text-md lg:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 px-2 gap-2 bg-genius-indigo border border-genius-blue py-[3px]"
           aria-haspopup="menu"
           aria-expanded={false}
         >
@@ -187,7 +188,7 @@ export function Footer() {
         <div className="absolute z-10 left-0 top-0 bottom-0 w-6 bg-linear-to-r from-genius-indigo to-transparent pointer-events-none" />
         <div className="absolute z-10 right-4 top-0 bottom-0 w-6 bg-linear-to-l from-genius-indigo to-transparent pointer-events-none" />
         <div className="relative flex items-center gap-6 overflow-x-auto overflow-y-hidden max-w-[45vw] pl-4 pr-5 custom-scrollbar">
-          {VISIBLE_TICKERS.map((ticker) => (
+          {footerTickers.map((ticker) => (
             <TickerChip key={ticker.symbol} ticker={ticker} compact />
           ))}
         </div>
@@ -225,26 +226,13 @@ export function Footer() {
               <span className="text-sm">{ticker.symbol}</span>
               <span className="text-sm text-genius-cream/50">{formatPrice(ticker.price)}</span>
             </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={tickerVisible[ticker.symbol]}
-              aria-label={`Toggle ${ticker.symbol} in ticker bar`}
-              onClick={() =>
-                setTickerVisible((prev) => ({ ...prev, [ticker.symbol]: !prev[ticker.symbol] }))
+            <Switch
+              checked={tickerVisible[ticker.symbol]}
+              onCheckedChange={(checked) =>
+                setTickerVisible((prev) => ({ ...prev, [ticker.symbol]: checked }))
               }
-              className={`inline-flex shrink-0 cursor-pointer items-center border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background h-4 w-[28px] rounded-[2px] ${
-                tickerVisible[ticker.symbol] ? "bg-genius-pink" : "bg-genius-blue"
-              }`}
-            >
-              <span
-                className={`pointer-events-none block h-3 w-3 rounded-[2px] bg-background shadow-lg transition-transform ${
-                  tickerVisible[ticker.symbol]
-                    ? "translate-x-[12px] ring-2 ring-genius-blue"
-                    : "translate-x-0 ring-2 ring-genius-pink"
-                }`}
-              />
-            </button>
+              aria-label={`Toggle ${ticker.symbol} in ticker bar`}
+            />
           </div>
         ))}
       </div>

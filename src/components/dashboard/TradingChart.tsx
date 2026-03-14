@@ -67,12 +67,30 @@ const FREQUENCIES = [
   { label: "1m", ms: 60_000 },
 ] as const;
 
-export function TradingChart({ chainId, tokenAddress }: { chainId: string; tokenAddress: string }) {
+export function TradingChart({
+  chainId,
+  tokenAddress,
+  resizeTrigger,
+}: {
+  chainId: string;
+  tokenAddress: string;
+  resizeTrigger?: number;
+}) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
   const candlesRef = useRef<OHLCCandle[]>([]);
   const { resolvedTheme } = useTheme();
+  // Default to dark so chart and container never flash white (perfect dark)
+  const isDark = resolvedTheme !== "light";
+
+  const applySize = useCallback(() => {
+    const el = chartContainerRef.current;
+    if (!chartRef.current || !el) return;
+    const w = el.clientWidth;
+    const h = el.clientHeight;
+    chartRef.current.applyOptions({ width: w, height: h });
+  }, []);
 
   const [activePeriod, setActivePeriod] = useState<number>(7);   // default 1W
   const [activeFreq, setActiveFreq] = useState<number>(60_000);   // default 1m
@@ -87,22 +105,32 @@ export function TradingChart({ chainId, tokenAddress }: { chainId: string; token
   useEffect(() => {
     if (!chartContainerRef.current) return;
 
-    const isLight = resolvedTheme === "light";
     const chart = createChart(chartContainerRef.current, {
       layout: {
-        // Dark theme colors tuned to resemble TradingView-style purple night mode
-        background: { type: ColorType.Solid, color: isLight ? "#ffffff" : "#09001A" },
-        textColor: isLight ? "#333333" : "#A3B1D1",
+        background: { type: ColorType.Solid, color: isDark ? "#09001A" : "#ffffff" },
+        textColor: isDark ? "#A3B1D1" : "#333333",
         fontSize: 11,
         fontFamily: "'Inter', sans-serif",
       },
       grid: {
-        vertLines: { color: isLight ? "rgba(0,0,0,0.04)" : "rgba(95, 106, 164, 0.25)" },
-        horzLines: { color: isLight ? "rgba(0,0,0,0.04)" : "rgba(95, 106, 164, 0.25)" },
+        vertLines: { color: isDark ? "rgba(95, 106, 164, 0.25)" : "rgba(0,0,0,0.04)" },
+        horzLines: { color: isDark ? "rgba(95, 106, 164, 0.25)" : "rgba(0,0,0,0.04)" },
       },
       crosshair: {
-        vertLine: { color: isLight ? "#5F6472" : "#9F7AEA", width: 1, style: 2, labelVisible: true },
-        horzLine: { color: isLight ? "#5F6472" : "#9F7AEA", width: 1, style: 2, labelVisible: true },
+        vertLine: {
+          color: isDark ? "#9F7AEA" : "#5F6472",
+          width: 1,
+          style: 2,
+          labelVisible: true,
+          labelBackgroundColor: isDark ? "#1a1625" : "#eef0f2",
+        },
+        horzLine: {
+          color: isDark ? "#9F7AEA" : "#5F6472",
+          width: 1,
+          style: 2,
+          labelVisible: true,
+          labelBackgroundColor: isDark ? "#1a1625" : "#eef0f2",
+        },
       },
       width: chartContainerRef.current.clientWidth,
       height: chartContainerRef.current.clientHeight,
@@ -110,12 +138,12 @@ export function TradingChart({ chainId, tokenAddress }: { chainId: string; token
         timeVisible: true,
         secondsVisible: false,
         tickMarkFormatter,
-        borderColor: isLight ? "rgba(0,0,0,0.1)" : "rgba(148, 163, 253, 0.35)",
+        borderColor: isDark ? "rgba(148, 163, 253, 0.35)" : "rgba(0,0,0,0.1)",
         barSpacing: 12,
         minBarSpacing: 4,
       },
       rightPriceScale: {
-        borderColor: isLight ? "rgba(0,0,0,0.1)" : "rgba(148, 163, 253, 0.35)",
+        borderColor: isDark ? "rgba(148, 163, 253, 0.35)" : "rgba(0,0,0,0.1)",
         scaleMargins: { top: 0.15, bottom: 0.15 },
         autoScale: true,
       },
@@ -158,31 +186,45 @@ export function TradingChart({ chainId, tokenAddress }: { chainId: string; token
       }
     });
 
-    const handleResize = () => {
-      if (chartRef.current && chartContainerRef.current)
-        chartRef.current.applyOptions({ width: chartContainerRef.current.clientWidth });
-    };
-    window.addEventListener("resize", handleResize);
-    return () => { window.removeEventListener("resize", handleResize); chart.remove(); };
-  }, []); // mount once
+    const handleWindowResize = () => applySize();
+    window.addEventListener("resize", handleWindowResize);
 
-  // ── Theme sync ──
+    const ro = new ResizeObserver(() => applySize());
+    ro.observe(chartContainerRef.current);
+
+    return () => {
+      window.removeEventListener("resize", handleWindowResize);
+      ro.disconnect();
+      chart.remove();
+    };
+  }, []); // mount once; theme updates applied in theme-sync effect below
+
+  // ── Theme sync (update existing chart when theme changes) ──
   useEffect(() => {
     if (!chartRef.current) return;
-    const isLight = resolvedTheme === "light";
     chartRef.current.applyOptions({
       layout: {
-        textColor: isLight ? "#333333" : "#A3B1D1",
-        background: { type: ColorType.Solid, color: isLight ? "#ffffff" : "#09001A" },
+        textColor: isDark ? "#A3B1D1" : "#333333",
+        background: { type: ColorType.Solid, color: isDark ? "#09001A" : "#ffffff" },
       },
       grid: {
-        vertLines: { color: isLight ? "rgba(0,0,0,0.04)" : "rgba(95, 106, 164, 0.25)" },
-        horzLines: { color: isLight ? "rgba(0,0,0,0.04)" : "rgba(95, 106, 164, 0.25)" },
+        vertLines: { color: isDark ? "rgba(95, 106, 164, 0.25)" : "rgba(0,0,0,0.04)" },
+        horzLines: { color: isDark ? "rgba(95, 106, 164, 0.25)" : "rgba(0,0,0,0.04)" },
       },
-      timeScale: { borderColor: isLight ? "rgba(0,0,0,0.1)" : "rgba(148, 163, 253, 0.35)" },
-      rightPriceScale: { borderColor: isLight ? "rgba(0,0,0,0.1)" : "rgba(148, 163, 253, 0.35)" },
+      crosshair: {
+        vertLine: {
+          color: isDark ? "#9F7AEA" : "#5F6472",
+          labelBackgroundColor: isDark ? "#1a1625" : "#eef0f2",
+        },
+        horzLine: {
+          color: isDark ? "#9F7AEA" : "#5F6472",
+          labelBackgroundColor: isDark ? "#1a1625" : "#eef0f2",
+        },
+      },
+      timeScale: { borderColor: isDark ? "rgba(148, 163, 253, 0.35)" : "rgba(0,0,0,0.1)" },
+      rightPriceScale: { borderColor: isDark ? "rgba(148, 163, 253, 0.35)" : "rgba(0,0,0,0.1)" },
     });
-  }, [resolvedTheme]);
+  }, [isDark]);
 
   // ── Data sync ──
   useEffect(() => {
@@ -201,6 +243,13 @@ export function TradingChart({ chainId, tokenAddress }: { chainId: string; token
     }
   }, [candles]);
 
+  // Resize chart when split ratio changes (e.g. user drags the resize handle)
+  useEffect(() => {
+    if (resizeTrigger == null) return;
+    const id = requestAnimationFrame(() => applySize());
+    return () => cancelAnimationFrame(id);
+  }, [resizeTrigger, applySize]);
+
   // ── Frequency-driven re-poll (override the hook's internal interval) ──
   // Hook polls on its own; we only need to trigger re-fetch on freq change by
   // remounting via key. Instead, expose the freq label in the UI only for now.
@@ -209,18 +258,18 @@ export function TradingChart({ chainId, tokenAddress }: { chainId: string; token
   const activeLabel = PERIODS.find(p => p.days === activePeriod)?.label ?? "1W";
 
   return (
-    <div className="w-full h-full relative rounded-lg overflow-hidden border border-black/10 dark:border-white/5 bg-white dark:bg-[#09001A] font-sans flex flex-col">
+    <div className="w-full h-full min-h-0 relative rounded-lg overflow-hidden border border-genius-blue/40 bg-[#09001A] font-sans flex flex-col">
       
       {/* ── Toolbar ── */}
-      <div className="flex items-center h-10 px-4 gap-1 border-b border-black/10 dark:border-white/[0.06] bg-white dark:bg-[#09001A] z-10 shrink-0">
+      <div className="flex items-center h-10 px-4 gap-1 border-b border-genius-blue/30 bg-[#09001A] z-10 shrink-0">
 
         {/* OHLC summary */}
         {pricing && (
-          <div className="flex items-center gap-3 font-mono text-[11px] text-[#8A8D9B] mr-4 hidden lg:flex">
-            <span>O<span className="ml-0.5 text-black dark:text-white">{formatChartPrice(pricing.o)}</span></span>
-            <span>H<span className="ml-0.5 text-black dark:text-white">{formatChartPrice(pricing.h)}</span></span>
-            <span>L<span className="ml-0.5 text-black dark:text-white">{formatChartPrice(pricing.l)}</span></span>
-            <span>C<span className="ml-0.5 text-black dark:text-white">{formatChartPrice(pricing.c)}</span></span>
+          <div className="flex items-center gap-3 font-mono text-[11px] text-genius-cream/60 mr-4 hidden lg:flex">
+            <span>O<span className="ml-0.5 text-genius-cream">{formatChartPrice(pricing.o)}</span></span>
+            <span>H<span className="ml-0.5 text-genius-cream">{formatChartPrice(pricing.h)}</span></span>
+            <span>L<span className="ml-0.5 text-genius-cream">{formatChartPrice(pricing.l)}</span></span>
+            <span>C<span className="ml-0.5 text-genius-cream">{formatChartPrice(pricing.c)}</span></span>
             <span className={pricing.diff >= 0 ? "text-[#089981]" : "text-[#f23645]"}>
               {pricing.diff >= 0 ? "+" : ""}{formatChartPrice(pricing.diff)} ({pricing.pct.toFixed(2)}%)
             </span>
@@ -230,7 +279,7 @@ export function TradingChart({ chainId, tokenAddress }: { chainId: string; token
         <div className="flex-1" />
 
         {/* Period label */}
-        <span className="text-[10px] text-[#8A8D9B] uppercase tracking-widest mr-1">Period:</span>
+        <span className="text-[10px] text-genius-cream/60 uppercase tracking-widest mr-1">Period:</span>
 
         {/* Period buttons */}
         {PERIODS.map(({ label, days }) => (
@@ -240,7 +289,7 @@ export function TradingChart({ chainId, tokenAddress }: { chainId: string; token
             className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all ${
               activePeriod === days
                 ? "bg-[#089981] text-white shadow shadow-[#089981]/30"
-                : "text-[#8A8D9B] hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5"
+                : "text-genius-cream/60 hover:text-genius-cream hover:bg-genius-blue/30"
             }`}
           >
             {label}
@@ -251,7 +300,7 @@ export function TradingChart({ chainId, tokenAddress }: { chainId: string; token
         <div className="w-px h-5 bg-black/10 dark:bg-white/10 mx-2" />
 
         {/* Frequency label */}
-        <span className="text-[10px] text-[#8A8D9B] uppercase tracking-widest mr-1">Freq:</span>
+        <span className="text-[10px] text-genius-cream/60 uppercase tracking-widest mr-1">Freq:</span>
 
         {/* Frequency buttons */}
         {FREQUENCIES.map(({ label, ms }) => (
@@ -261,7 +310,7 @@ export function TradingChart({ chainId, tokenAddress }: { chainId: string; token
             className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all ${
               activeFreq === ms
                 ? "bg-[#089981] text-white shadow shadow-[#089981]/30"
-                : "text-[#8A8D9B] hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5"
+                : "text-genius-cream/60 hover:text-genius-cream hover:bg-genius-blue/30"
             }`}
           >
             {label}
@@ -270,20 +319,29 @@ export function TradingChart({ chainId, tokenAddress }: { chainId: string; token
 
         {/* Loading spinner */}
         {loading && (
-          <div className="w-3 h-3 border border-[#089981] border-t-transparent rounded-full animate-spin ml-2" />
+          <div className="w-3 h-3 border border-genius-green border-t-transparent rounded-full animate-spin ml-2" />
         )}
       </div>
 
       {/* ── Left sidebar tools (decorative) ── */}
-      <div className="absolute top-10 left-0 w-10 bottom-0 border-r border-black/10 dark:border-white/5 flex flex-col items-center py-4 gap-4 text-gray-400 z-10 bg-white/80 dark:bg-[#09001A]/80 backdrop-blur">
-        <div className="w-5 h-5 border border-current rounded flex items-center justify-center hover:text-black dark:hover:text-white cursor-pointer text-xs">+</div>
-        <div className="w-5 h-5 border border-current rounded-full hover:text-black dark:hover:text-white cursor-pointer" />
-        <div className="w-5 h-px bg-current hover:bg-black dark:hover:bg-white cursor-pointer mt-4" />
+      <div className="absolute top-10 left-0 w-10 bottom-0 border-r border-genius-blue/30 flex flex-col items-center py-4 gap-4 text-genius-cream/50 z-10 bg-[#09001A]/90 backdrop-blur">
+        <div className="w-5 h-5 border border-current rounded flex items-center justify-center hover:text-genius-cream cursor-pointer text-xs">+</div>
+        <div className="w-5 h-5 border border-current rounded-full hover:text-genius-cream cursor-pointer" />
+        <div className="w-5 h-px bg-current hover:bg-genius-cream cursor-pointer mt-4" />
       </div>
 
       {/* ── Chart canvas ── */}
-      <div className="flex-1 relative min-h-0">
-        <div ref={chartContainerRef} className="absolute inset-0 left-10" />
+      <div className="flex-1 relative min-h-0 bg-[#09001A]">
+        <div ref={chartContainerRef} className="absolute inset-0 left-10 bg-[#09001A]" />
+        {/* Loading overlay when no candle data yet */}
+        {loading && candles.length === 0 && (
+          <div className="absolute inset-0 left-10 flex items-center justify-center bg-[#09001A]/95 z-20">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-8 h-8 border-2 border-genius-green/60 border-t-genius-green rounded-full animate-spin" />
+              <span className="text-xs text-genius-cream/70">Loading chart...</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

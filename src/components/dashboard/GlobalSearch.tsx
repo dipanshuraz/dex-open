@@ -42,23 +42,22 @@ export function GlobalSearch() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-[11px] text-gray-500"
+      className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-genius-blue/30 border border-genius-blue text-[11px] text-genius-cream"
     >
-      <Search className="w-3.5 h-3.5 text-gray-400" />
+      <Search className="w-3.5 h-3.5 text-genius-cream/60" />
       <input
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder="Search token, pair, or address"
-        className="bg-transparent outline-none text-[11px] text-black dark:text-white placeholder:text-gray-400 w-48"
+        className="bg-transparent outline-none text-[11px] text-genius-cream placeholder:text-genius-cream/50 w-48"
       />
       <button
         type="submit"
         disabled={loading}
-        className="text-[10px] uppercase tracking-[0.16em] text-purple-500 hover:text-purple-300 disabled:opacity-50"
+        className="text-[10px] uppercase tracking-[0.16em] text-genius-pink hover:text-genius-pink/80 disabled:opacity-50"
       >
         Go
       </button>
     </form>
   );
 }
-

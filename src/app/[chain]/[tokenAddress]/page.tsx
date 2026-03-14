@@ -1,11 +1,13 @@
 "use client";
 
-import { use, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { TabbedPanel } from "@/components/dashboard/TabbedPanel";
 import { TradingChart } from "@/components/dashboard/TradingChart";
 import { AdvancedPanelTokenStats } from "@/components/dashboard/AdvancedPanelTokenStats";
 import { usePairMetadata } from "@/hooks/usePairMetadata";
+import { useMarkets } from "@/hooks/useMarkets";
 import { formatNumber } from "@/lib/utils";
 import { TokenStats } from "@/components/dashboard/TokenStats";
 import { notFound } from "next/navigation";
@@ -27,8 +29,14 @@ export default function TokenPage({ params }: Props) {
     notFound();
   }
 
-  // Lifted state: tracks which pool pair is selected via the MarketSelector in TopBar
+  // Auto-selected pool (best liquidity); no pool selector UI
   const [selectedPairAddress, setSelectedPairAddress] = useState<string>(tokenAddress);
+  const searchParams = useSearchParams();
+  const initialDexId = searchParams?.get("pool") ?? undefined;
+  const { selected } = useMarkets(chain, tokenAddress, initialDexId);
+  useEffect(() => {
+    if (selected?.pairAddress) setSelectedPairAddress(selected.pairAddress);
+  }, [selected?.pairAddress]);
   // Controls the visibility of the right sidebar panel
   const [isRightCollapsed, setIsRightCollapsed] = useState(false);
   // Resizable chart vs trades panel: chart height as % of the left column (20–80%)
@@ -58,6 +66,21 @@ export default function TokenPage({ params }: Props) {
   };
 
   const { metadata, loading } = usePairMetadata(chain, selectedPairAddress);
+
+  // Tab title: "BTC • $70,724.8755 • Buy BTC on Genius • Trade Crypto Like a Genius"
+  useEffect(() => {
+    if (!metadata) return;
+    const symbol = metadata.baseToken.symbol;
+    const priceStr = Number(metadata.priceUsd).toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 4,
+    });
+    document.title = `${symbol} • $${priceStr} • Buy ${symbol} on Genius • Trade Crypto Like a Genius`;
+    return () => {
+      document.title = "Web3 Dashboard";
+    };
+  }, [metadata]);
+
   const formatPriceChange = (n: number | undefined) =>
     n == null ? "--" : `${n >= 0 ? "+" : ""}${n.toFixed(2)}%`;
   const formatCount = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(0)}K` : String(n));
@@ -81,52 +104,49 @@ export default function TokenPage({ params }: Props) {
   ];
 
   return (
-    <div className="relative min-h-screen bg-[#070815] text-white selection:bg-purple-500/30 font-sans flex flex-col overflow-hidden">
-      {/* Background glow, matching the assets page */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-purple-500/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/3 w-[300px] h-[300px] bg-blue-500/5 rounded-full blur-3xl" />
-      </div>
-
-      {/* Header bar */}
-      <div className="relative z-30">
-        <TopBar
-          chainId={chain}
-          tokenAddress={tokenAddress}
-          onPoolSelect={setSelectedPairAddress}
-        />
-      </div>
-
+    <div className="relative h-full min-h-0 bg-[#070815] text-white selection:bg-purple-500/30 font-sans flex flex-col overflow-hidden">
       {/* Main Grid Layout */}
-      <main className="relative z-10 flex-1 flex overflow-hidden">
-        {/* Left Content Area (Chart + Resize Handle + Trades Panel) */}
+      <main className="relative z-10 flex-1 flex min-h-0 overflow-hidden">
+        {/* Left Content Area (Token bar + Chart + Resize Handle + Trades Panel) */}
         <div
           ref={chartPanelContainerRef}
-          className="flex-1 flex flex-col min-h-0 min-w-0 p-2 gap-0 overflow-hidden bg:transparent dark:bg-transparent"
+          className="flex-1 flex flex-col min-h-0 min-w-0 p-0 gap-0 overflow-hidden bg:transparent dark:bg-transparent"
         >
-          {/* Candlestick Chart - height controlled by resize handle (flex ratio) */}
-          <div
-            className="w-full relative min-h-[140px] overflow-hidden rounded-t-lg"
-            style={{
-              flex: `${chartHeightPercent} 1 0`,
-              minHeight: 0,
-            }}
-          >
-            <TradingChart chainId={chain} tokenAddress={tokenAddress} />
+          {/* Token bar – left panel only, above chart */}
+          <div className="shrink-0 min-w-0 rounded-t-lg overflow-hidden border-genius-blue border-b-0">
+            <TopBar chainId={chain} tokenAddress={tokenAddress} />
           </div>
 
-          {/* Resize handle */}
-          <button
-            type="button"
+          {/* Candlestick Chart - height controlled by resize handle (flex ratio) */}
+          <div
+            className="w-full relative overflow-hidden min-h-0"
+            style={{
+              flex: `${chartHeightPercent} 1 0`,
+              minHeight: 120,
+              maxHeight: "80%",
+            }}
+          >
+            <TradingChart
+              chainId={chain}
+              tokenAddress={tokenAddress}
+              resizeTrigger={chartHeightPercent}
+            />
+          </div>
+
+          {/* Resize handle – drag to change chart vs table height (joined: one increases, other decreases) */}
+          <div
+            role="button"
+            tabIndex={0}
             aria-label="Resize chart and trades panel"
-            className="shrink-0 h-2 w-full cursor-ns-resize flex items-center justify-center border-y border-white/5 bg-[#070815] hover:bg-white/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-genius-blue focus-visible:ring-inset transition-colors"
+            className="resizer min-h-1 w-full bg-genius-blue cursor-ns-resize hover:bg-genius-pink/30 transition-colors flex items-center justify-center shrink-0"
+            style={{ touchAction: "none" }}
             onMouseDown={(e) => {
               e.preventDefault();
               handleResizeStart(e.clientY, chartHeightPercent);
             }}
           >
-            <span className="w-12 h-0.5 rounded-full bg-white/20 pointer-events-none" />
-          </button>
+            <div className="w-4 h-0.5 bg-genius-cream/30 rounded-full" aria-hidden />
+          </div>
 
           {/* Trades / Holders / Pools tabs - takes remaining height (flex ratio) */}
           <div
@@ -147,17 +167,17 @@ export default function TokenPage({ params }: Props) {
         {/* Right Sidebar – collapsible advanced panel wrapper.
             When collapsed, wrapper width is 0 so the left panel can occupy full width. */}
         <div
-          className={`relative shrink-0 h-[calc(100vh-70px-45px)] overflow-visible transition-[width] duration-300 ease-in-out ${
-            isRightCollapsed ? "w-0 min-w-0" : "w-[350px]"
+          className={`relative shrink-0 h-full min-h-0 overflow-visible transition-[width] duration-300 ease-in-out ${
+            isRightCollapsed ? "w-0 min-w-0" : "w-[350px] min-w-0"
           }`}
         >
           {/* Sidebar content – fills wrapper when expanded */}
           <div
-            className={`absolute right-0 top-0 bottom-0 flex flex-col overflow-y-auto min-w-0 border-l border-white/5 bg-[#09001A] custom-scrollbar transition-all duration-300 ease-in-out ${
-              isRightCollapsed ? "w-0 max-w-0 opacity-0 pointer-events-none" : "w-[350px] max-w-[350px] opacity-100"
+            className={`absolute right-0 top-0 bottom-0 flex flex-col overflow-y-auto min-w-0 w-[350px] max-w-[350px] border-l border-genius-blue bg-genius-indigo custom-scrollbar transition-all duration-300 ease-in-out ${
+              isRightCollapsed ? "max-w-0 opacity-0 pointer-events-none border-l-0" : "opacity-100"
             }`}
           >
-            <div className="flex flex-col gap-0 shrink-0">
+            <div className="flex flex-col gap-0 shrink-0 min-h-0">
               <AdvancedPanelTokenStats
                 stats={{
                   volumeLabel: "4H VOLUME",
@@ -174,7 +194,7 @@ export default function TokenPage({ params }: Props) {
               />
               <TradingControls />
             </div>
-            <div className="flex flex-col border-y border-genius-blue flex-1 min-h-0">
+            <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
               <TokenStats chainId={chain} tokenAddress={tokenAddress} />
             </div>
           </div>
@@ -199,12 +219,12 @@ export default function TokenPage({ params }: Props) {
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className={`lucide lucide-chevron-up w-3 h-3 text-genius-cream transition-transform ${
-              isRightCollapsed ? "-rotate-90" : "rotate-90"
+            className={`w-3 h-3 text-genius-cream transition-transform ${
+              isRightCollapsed ? "rotate-180" : ""
             }`}
             aria-hidden="true"
           >
-            <path d="m18 15-6-6-6 6" />
+            <path d="m9 18 6-6-6-6" />
           </svg>
         </button>
       </main>

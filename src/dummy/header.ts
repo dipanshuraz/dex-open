@@ -4,7 +4,7 @@ export type NavItem = {
 };
 
 export const MAIN_NAV_ITEMS: NavItem[] = [
-  { label: "Discover", href: "/asset" },
+  { label: "Discover", href: "/" },
   { label: "Launchpads", href: "/launchpads" },
   { label: "Perps", href: "/hyperliquid" },
   { label: "Holdings", href: "/portfolio" },

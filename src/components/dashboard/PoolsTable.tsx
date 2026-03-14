@@ -133,16 +133,18 @@ export function PoolsTable({
 
   return (
     <div className="absolute inset-0 flex flex-col font-sans bg-genius-indigo text-genius-cream">
-      {/* Table Header */}
-      <div className="grid grid-cols-7 items-center px-4 py-2.5 bg-genius-indigo border-b border-genius-blue text-sm leading-5 font-medium text-genius-cream/80 sticky top-0 z-10 w-full shrink-0 gap-x-3">
-        <div className="truncate w-full text-left">Pool</div>
-        <div className="truncate w-full text-left">Pair</div>
-        <div className="truncate w-full text-left">Price/Mark Price Diff</div>
-        <div className="truncate w-full text-left">Backing Asset Liquidity</div>
-        <div className="truncate w-full text-left">Volume (24h)</div>
-        <div className="truncate w-full text-left">Age</div>
-        <div className="truncate w-full text-left">Buy / Sell</div>
-      </div>
+      {/* Table Header – same design as TradesTable */}
+      <header className="sticky top-0 z-10 w-full shrink-0">
+        <div className="grid grid-cols-7 w-full px-5 py-1.5 bg-genius-blue/50 items-center gap-2">
+          <div className="text-genius-cream/60 whitespace-nowrap text-xs">Pool</div>
+          <div className="text-genius-cream/60 whitespace-nowrap text-xs">Pair</div>
+          <div className="text-genius-cream/60 whitespace-nowrap text-xs">Price/Mark Price Diff</div>
+          <div className="text-genius-cream/60 whitespace-nowrap text-xs">Backing Asset Liquidity</div>
+          <div className="text-genius-cream/60 whitespace-nowrap text-xs">Volume (24h)</div>
+          <div className="text-genius-cream/60 whitespace-nowrap text-xs">Age</div>
+          <div className="text-genius-cream/60 whitespace-nowrap text-xs">Buy / Sell</div>
+        </div>
+      </header>
 
       {/* Table Body */}
       <div className="flex-1 overflow-y-auto custom-scrollbar relative">

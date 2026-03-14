@@ -68,7 +68,7 @@ export function MarketSelector({ chainId, tokenAddress, onPoolSelect }: Props) {
 
   if (loading) {
     return (
-      <div className="h-7 px-3 rounded-full bg-black/5 dark:bg-white/5 flex items-center text-[10px] text-gray-500 animate-pulse">
+      <div className="h-8 px-3 rounded-sm border border-genius-blue flex items-center text-[10px] text-genius-cream/60 animate-pulse">
         Loading pools…
       </div>
     );
@@ -76,7 +76,7 @@ export function MarketSelector({ chainId, tokenAddress, onPoolSelect }: Props) {
 
   if (error || !selected) {
     return (
-      <div className="h-7 px-3 rounded-full bg-red-500/10 text-red-400 flex items-center text-[10px]">
+      <div className="h-8 px-3 rounded-sm border border-genius-blue flex items-center text-[10px] text-genius-red">
         No pools
       </div>
     );
@@ -84,67 +84,64 @@ export function MarketSelector({ chainId, tokenAddress, onPoolSelect }: Props) {
 
   return (
     <div ref={ref} className="relative">
-      {/* Pill trigger */}
+      {/* Trigger: genius theme – pair label + liquidity + chevron */}
       <button
-        onClick={() => setOpen(v => !v)}
-        className="group flex items-center gap-2 h-7 px-3 rounded-full bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors border border-black/10 dark:border-white/10"
+        onClick={() => setOpen((v) => !v)}
+        className="group flex items-center gap-2 px-2 py-[7px] rounded-sm border border-genius-blue bg-transparent hover:brightness-95 transition-all text-sm text-genius-cream cursor-pointer"
       >
-        <Zap className="w-3 h-3 text-yellow-400 shrink-0" />
-        <span className="text-[11px] font-semibold text-gray-800 dark:text-gray-100 whitespace-nowrap">
-          {selected.label}
-        </span>
-        <span className="text-[10px] text-gray-500 whitespace-nowrap">
-          ${formatNumber(selected.liquidityUsd)} liq
+        <Zap className="w-4 h-4 text-genius-cream/80 shrink-0" />
+        <span className="text-sm whitespace-nowrap font-medium">{selected.label}</span>
+        <span className="text-xs text-genius-cream/60 whitespace-nowrap">
+          ${formatNumber(selected.liquidityUsd)}
         </span>
         <ChevronDown
-          className={`w-3 h-3 text-gray-500 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          className={`w-4 h-4 text-genius-cream/70 shrink-0 ml-auto transition-transform duration-200 ${open ? "rotate-180" : ""}`}
         />
       </button>
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute right-0 top-9 z-50 w-72 rounded-xl bg-white dark:bg-[#12111A] border border-black/10 dark:border-white/10 shadow-xl shadow-black/20 overflow-hidden">
-          <div className="px-3 py-2 border-b border-black/5 dark:border-white/5 text-[10px] uppercase tracking-widest text-gray-400 font-bold">
+        <div className="absolute right-0 top-full mt-1 z-50 w-72 rounded-lg bg-genius-indigo border border-genius-blue shadow-xl overflow-hidden">
+          <div className="px-3 py-2 border-b border-genius-blue text-[10px] uppercase tracking-widest text-genius-cream/60 font-semibold">
             Select Pool
           </div>
 
-          {/* Search bar */}
-          <div className="px-3 py-2 border-b border-black/5 dark:border-white/5">
-            <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10">
-              <Search className="w-3 h-3 text-gray-400 shrink-0" />
+          <div className="px-3 py-2 border-b border-genius-blue">
+            <div className="flex items-center gap-2 px-2 py-1.5 rounded-sm bg-genius-blue/30 border border-genius-blue">
+              <Search className="w-3 h-3 text-genius-cream/60 shrink-0" />
               <input
                 ref={searchRef}
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search pools…"
-                className="flex-1 bg-transparent text-[11px] text-gray-800 dark:text-gray-100 placeholder-gray-400 outline-none"
+                className="flex-1 bg-transparent text-[11px] text-genius-cream placeholder-genius-cream/50 outline-none"
               />
             </div>
           </div>
 
           <div className="max-h-56 overflow-y-auto custom-scrollbar">
             {filtered.length === 0 ? (
-              <div className="px-3 py-4 text-center text-[11px] text-gray-500">No pools found</div>
+              <div className="px-3 py-4 text-center text-[11px] text-genius-cream/50">No pools found</div>
             ) : (
               filtered.map((m) => (
                 <button
                   key={m.id}
                   onClick={() => handleSelect(m)}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-left gap-2 ${
-                    m.id === selected.id ? "bg-purple-500/5" : ""
+                  className={`w-full flex items-center justify-between px-3 py-2.5 hover:bg-genius-blue/30 transition-colors text-left gap-2 ${
+                    m.id === selected.id ? "bg-genius-blue/20" : ""
                   }`}
                 >
                   <div className="flex flex-col min-w-0">
-                    <span className="text-[12px] font-semibold text-gray-800 dark:text-gray-100 truncate">
+                    <span className="text-[12px] font-medium text-genius-cream truncate">
                       {m.label}
                     </span>
-                    <span className="text-[10px] text-gray-400">
+                    <span className="text-[10px] text-genius-cream/60">
                       ${formatNumber(m.liquidityUsd)} liquidity
                     </span>
                   </div>
                   {m.id === selected.id && (
-                    <CheckCircle2 className="w-4 h-4 text-purple-400 shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-genius-pink shrink-0" />
                   )}
                 </button>
               ))

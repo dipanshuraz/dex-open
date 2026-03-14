@@ -47,12 +47,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#070815] text-white flex flex-col items-center justify-center px-4 font-sans">
 
-      {/* Background glow */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-purple-500/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/3 w-[300px] h-[300px] bg-blue-500/5 rounded-full blur-3xl" />
-      </div>
-
       <div className="relative z-10 flex flex-col items-center gap-8 w-full max-w-2xl">
 
         {/* Logo / Title */}

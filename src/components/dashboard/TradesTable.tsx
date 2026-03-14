@@ -9,6 +9,16 @@ import { ExternalLink, Loader2, Funnel, ArrowRightLeft } from "lucide-react";
 import { TableEmptyState } from "./TableEmptyState";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
+// ── Table column config (single source of truth for header + row layout) ──
+const TRADES_COLUMNS = [
+  { key: "time", label: "Time", sortable: true, align: "left" as const },
+  { key: "type", label: "Type", sortable: false, align: "left" as const },
+  { key: "price", label: "Price", sortable: true, align: "left" as const },
+  { key: "amount", label: "Amount", sortable: false, align: "left" as const },
+  { key: "totalUsd", label: "Total USD", sortable: true, align: "left" as const },
+  { key: "trader", label: "Trader", sortable: false, align: "right" as const },
+] as const;
+
 // ── Mobile breakpoint ──
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
@@ -35,7 +45,7 @@ function useNow() {
 // ── Helpers ──
 function shortAddr(a: string) {
   if (!a || a.length < 10) return a || "—";
-  return `${a.slice(0, 6)}…${a.slice(-4)}`;
+  return `${a.slice(0, 3)}...${a.slice(-3)}`;
 }
 
 function ageStr(now: number, ts: number) {
@@ -102,7 +112,6 @@ function CompactTradeRow({
             />
           )}
           {trade.type}
-          {trade.isWhale ? " 🐋" : ""}
         </span>
         <span className="text-[12px] font-semibold font-mono truncate" style={{ color: accent }}>
           ${formatNumber(trade.total)}
@@ -126,7 +135,71 @@ function CompactTradeRow({
   );
 }
 
-// ── Desktop single row (6 cols: Age/Time, Type, Price/M.Cap, Amount, Total USD, Trader) ──
+// ── Table header (driven by TRADES_COLUMNS) ──
+function TradesTableHeader({
+  ageColumnMode,
+  priceColumnMode,
+  onAgeColumnModeToggle,
+  onPriceColumnModeToggle,
+}: {
+  ageColumnMode: "age" | "time";
+  priceColumnMode: "price" | "mcap";
+  onAgeColumnModeToggle: () => void;
+  onPriceColumnModeToggle: () => void;
+}) {
+  const renderLabel = (col: (typeof TRADES_COLUMNS)[number]) => {
+    if (col.key === "time") {
+      return (
+        <button
+          type="button"
+          onClick={onAgeColumnModeToggle}
+          className="w-fit flex items-center gap-1 cursor-pointer hover:opacity-70 transition-opacity"
+        >
+          {ageColumnMode === "age" ? "Age" : "Time"}
+          <ArrowRightLeft className="w-3 h-3 shrink-0" strokeWidth={2} aria-hidden />
+        </button>
+      );
+    }
+    if (col.key === "price") {
+      return (
+        <button
+          type="button"
+          onClick={onPriceColumnModeToggle}
+          className="w-fit flex items-center gap-1 cursor-pointer hover:opacity-70 transition-opacity"
+        >
+          {priceColumnMode === "price" ? "Price" : "M.Cap"}
+          <ArrowRightLeft className="w-3 h-3 shrink-0" strokeWidth={2} aria-hidden />
+        </button>
+      );
+    }
+    if (col.key === "totalUsd") {
+      return (
+        <div className="w-fit flex items-center gap-1 cursor-pointer hover:opacity-70 transition-opacity">
+          Total USD
+          <ArrowRightLeft className="w-3 h-3 shrink-0" strokeWidth={2} aria-hidden />
+        </div>
+      );
+    }
+    return col.label;
+  };
+
+  return (
+    <div className="grid grid-cols-6 w-full px-5 py-1.5 bg-genius-blue/50 items-center gap-2">
+      {TRADES_COLUMNS.map((col) => (
+        <div
+          key={col.key}
+          className={`text-genius-cream/60 whitespace-nowrap text-xs ${
+            col.align === "right" ? "text-right" : ""
+          }`}
+        >
+          {renderLabel(col)}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Desktop single row (6 cols, grid-aligned with TRADES_COLUMNS) ──
 function TradeRow({
   trade,
   now,
@@ -148,6 +221,7 @@ function TradeRow({
 }) {
   const isBuy = trade.type === "BUY";
   const typeColor = isBuy ? "text-genius-green" : "text-genius-red";
+  // Bar width = (this trade's total / max total among all visible trades) × 100%
   const gradientPct =
     maxTotalUsd > 0 ? Math.min(100, (trade.total / maxTotalUsd) * 100) : 0;
 
@@ -157,9 +231,9 @@ function TradeRow({
       : "bg-genius-red/15"
     : "bg-transparent";
 
-  const firstColLabel =
+  const timeLabel =
     ageColumnMode === "age" ? ageStr(now, trade.timestamp) : timeStr(trade.timestamp);
-  const thirdColLabel =
+  const priceLabel =
     priceColumnMode === "price"
       ? formatNumber(trade.price)
       : marketCap != null && marketCap > 0
@@ -172,15 +246,15 @@ function TradeRow({
       initial={{ opacity: 0, y: -6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className={`relative flex flex-row w-full px-5 py-2.5 h-[38px] items-center transition-colors hover:bg-genius-blue cursor-pointer overflow-hidden ${
+      className={`relative grid grid-cols-6 w-full px-5 py-2.5 h-[38px] items-center transition-colors hover:bg-genius-blue cursor-pointer overflow-hidden ${
         trade.isNew ? flashBg : ""
       }`}
     >
-      <div className="w-1/6 flex flex-col relative z-10">
-        <div className="text-sm leading-5 font-medium text-genius-cream/80">{firstColLabel}</div>
+      <div className="min-w-0 flex flex-col relative z-10">
+        <span className="text-sm text-genius-cream/80 truncate">{timeLabel}</span>
       </div>
-      <div className="w-1/6 flex flex-col relative z-10">
-        <div className={`text-sm leading-5 font-medium ${typeColor}`}>
+      <div className="min-w-0 flex flex-col relative z-10">
+        <span className={`text-sm ${typeColor}`}>
           {trade.isNew && (
             <span
               className={`inline-block w-1.5 h-1.5 rounded-full animate-ping mr-1 ${
@@ -189,35 +263,35 @@ function TradeRow({
             />
           )}
           {trade.type === "BUY" ? "Buy" : "Sell"}
-          {trade.isWhale && " 🐋"}
-        </div>
+        </span>
       </div>
-      <div className="w-1/6 flex flex-col relative z-10">
-        <div className="text-sm leading-5 font-medium text-genius-cream">{thirdColLabel}</div>
+      <div className="min-w-0 flex flex-col relative z-10">
+        <span className="text-sm text-genius-cream truncate">{priceLabel}</span>
       </div>
-      <div className="w-1/6 flex flex-col relative z-10">
-        <div className="text-sm leading-5 font-medium text-genius-cream">{formatNumber(trade.amount)}</div>
+      <div className="min-w-0 flex flex-col relative z-10">
+        <span className="text-sm text-genius-cream truncate">{formatNumber(trade.amount)}</span>
       </div>
-      <div className="w-1/6 flex flex-col relative z-10">
-        <div className="relative">
-          <div className={`text-sm leading-5 font-medium ${typeColor}`}>${formatNumber(trade.total)}</div>
+      <div className="min-w-0 relative w-full self-stretch">
+        <div className="absolute inset-0 flex items-center">
           <div
-            className={`absolute -top-2.5 -bottom-2.5 left-0 transition-all duration-500 ease-out ${
-              isBuy
-                ? "bg-linear-to-r from-genius-green/0 to-genius-green/30"
-                : "bg-linear-to-r from-genius-red/0 to-genius-red/30"
-            }`}
-            style={{ width: `${gradientPct}%` }}
+            className="absolute inset-y-0 left-0 z-0 transition-[width] duration-500 ease-out"
+            style={{
+              width: `${gradientPct}%`,
+              backgroundImage: isBuy
+                ? "linear-gradient(to right, hsl(var(--genius-green) / 0), hsl(var(--genius-green) / 0.3))"
+                : "linear-gradient(to right, hsl(var(--genius-red) / 0), hsl(var(--genius-red) / 0.3))",
+            }}
           />
+          <span className={`text-sm relative z-10 ${typeColor}`}>${formatNumber(trade.total)}</span>
         </div>
       </div>
-      <div className="w-1/6 text-right flex flex-col relative z-10 items-end">
+      <div className="flex flex-col relative z-10 items-end justify-center">
         <div className="flex items-center gap-2">
           <a
             href={`${explorer}/address/${trade.trader}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-fit text-sm text-genius-cream hover:opacity-70 transition-opacity border-2 border-dotted border-genius-blue rounded-sm px-1"
+            className="w-fit text-sm text-genius-cream hover:opacity-70 transition-opacity border-2 border-dotted border-genius-blue rounded-sm px-1 shrink-0"
             onClick={(e) => e.stopPropagation()}
           >
             {shortAddr(trade.trader)}
@@ -226,7 +300,7 @@ function TradeRow({
             href={`${explorer}/address/${trade.trader}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-genius-cream/60 hover:text-genius-cream transition-colors cursor-pointer"
+            className="text-genius-cream/60 hover:text-genius-cream transition-colors cursor-pointer shrink-0"
             aria-label="View on explorer"
           >
             <ExternalLink className="w-3 h-3" strokeWidth={2} />
@@ -237,7 +311,7 @@ function TradeRow({
               e.stopPropagation();
               onFilterByTrader(trade.trader);
             }}
-            className="text-genius-cream/60 hover:text-genius-cream transition-colors cursor-pointer"
+            className="text-genius-cream/60 hover:text-genius-cream transition-colors cursor-pointer shrink-0"
             aria-label="Filter by trader"
           >
             <Funnel className="w-3 h-3" strokeWidth={2} />
@@ -317,32 +391,15 @@ export function TradesTable({
   const hasVisibleTrades = visibleTrades.length > 0;
 
   return (
-    <div className="flex flex-col h-full min-h-0 font-sans bg-genius-indigo text-genius-cream">
-      {/* Header row */}
-      <div className="sticky top-0 z-10 w-full shrink-0 bg-genius-indigo border-b border-genius-blue">
-        <div className="flex flex-row w-full px-5 py-2 text-sm leading-5 font-medium text-genius-cream/80">
-          <button
-            type="button"
-            onClick={() => setAgeColumnMode((m) => (m === "age" ? "time" : "age"))}
-            className="w-1/6 flex items-center gap-1.5 hover:text-genius-cream transition-colors text-left"
-          >
-            {ageColumnMode === "age" ? "Age" : "Time"}
-            <ArrowRightLeft className="w-3 h-3 shrink-0" strokeWidth={2} />
-          </button>
-          <div className="w-1/6">Type</div>
-          <button
-            type="button"
-            onClick={() => setPriceColumnMode((m) => (m === "price" ? "mcap" : "price"))}
-            className="w-1/6 flex items-center gap-1.5 hover:text-genius-cream transition-colors text-left"
-          >
-            {priceColumnMode === "price" ? "Price" : "M.Cap"}
-            <ArrowRightLeft className="w-3 h-3 shrink-0" strokeWidth={2} />
-          </button>
-          <div className="w-1/6">Amount</div>
-          <div className="w-1/6">Total USD</div>
-          <div className="w-1/6 text-right">Trader</div>
-        </div>
-      </div>
+    <div className="flex flex-col h-full min-h-0 w-full font-sans bg-genius-indigo text-genius-cream">
+      <header className="sticky top-0 z-10 w-full shrink-0">
+        <TradesTableHeader
+          ageColumnMode={ageColumnMode}
+          priceColumnMode={priceColumnMode}
+          onAgeColumnModeToggle={() => setAgeColumnMode((m) => (m === "age" ? "time" : "age"))}
+          onPriceColumnModeToggle={() => setPriceColumnMode((m) => (m === "price" ? "mcap" : "price"))}
+        />
+      </header>
 
       {/* Body */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto custom-scrollbar relative">

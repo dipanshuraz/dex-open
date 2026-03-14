@@ -5,8 +5,6 @@ import { usePairMetadata } from "@/hooks/usePairMetadata";
 import { useTokenProfile } from "@/hooks/useTokenProfile";
 import { formatCurrency, formatNumber } from "@/lib/utils";
 import { useHolders } from "@/hooks/useHolders";
-import { MarketSelector } from "./MarketSelector";
-import { GlobalSearch } from "./GlobalSearch";
 import { CopyIcon } from "@/components/icons/CopyIcon";
 import { ShareIcon } from "@/components/icons/ShareIcon";
 import { StarSmallIcon } from "@/components/icons/StarSmallIcon";
@@ -17,14 +15,12 @@ import { LanguagesIcon } from "@/components/icons/LanguagesIcon";
 import { SearchSmallIcon } from "@/components/icons/SearchSmallIcon";
 import { SettingsCogIcon } from "@/components/icons/SettingsCogIcon";
 
-export function TopBar({ 
-  chainId, 
-  tokenAddress, 
-  onPoolSelect,
-}: { 
-  chainId: string; 
+export function TopBar({
+  chainId,
+  tokenAddress,
+}: {
+  chainId: string;
   tokenAddress: string;
-  onPoolSelect?: (pairAddress: string) => void;
 }) {
   const { metadata, loading, error } = usePairMetadata(chainId, tokenAddress);
   const { profile } = useTokenProfile(tokenAddress);
@@ -127,18 +123,22 @@ export function TopBar({
       })()
     : "—";
 
+  // Buy pressure as deviation from 50%: positive = more buys (green), negative = more sells (red)
+  const buyPressureDelta = buyPressure - 50;
+  const buyPressurePositive = buyPressureDelta >= 0;
+
   return (
-    <div className="group relative flex items-center py-2.5 bg-genius-indigo border-b border-genius-blue border-r text-xs font-sans text-genius-cream">
-      {/* Edge gradients */}
+    <div className="group relative flex items-center py-2.5 bg-genius-indigo border-b border-genius-blue text-xs font-sans text-genius-cream w-full min-w-0">
+      {/* Edge gradients for horizontal scroll hint */}
       <div className="absolute left-0 top-0 bottom-0 w-6 bg-linear-to-r from-genius-indigo to-transparent z-10 pointer-events-none" />
       <div className="absolute right-0 top-0 bottom-0 w-6 bg-linear-to-l from-genius-indigo to-transparent z-10 pointer-events-none" />
 
-      {/* Scrollable content row */}
-      <div className="flex items-center gap-8 pl-4 pr-5 overflow-x-auto overflow-y-hidden w-full">
+      {/* Scrollable content row – constrained to parent (left panel) width */}
+      <div className="flex items-center gap-6 sm:gap-8 pl-3 pr-4 sm:pl-4 sm:pr-5 overflow-x-auto overflow-y-hidden w-full min-w-0">
         {/* Token + socials + price */}
-        <div className="flex flex-row items-center gap-3">
+        <div className="flex flex-row items-center gap-3 shrink-0">
           <div className="flex items-center gap-3 relative group/tokenimage">
-            <div className="relative rounded-md border-2 border-genius-pink w-8 h-8 overflow-hidden">
+            <div className="relative rounded-md border border-genius-blue/80 w-8 h-8 overflow-hidden shrink-0">
               {imageUrl ? (
                 <img src={imageUrl} alt={symbol} className="w-full h-full object-cover" />
               ) : (
@@ -149,28 +149,28 @@ export function TopBar({
             </div>
           </div>
 
-          <div className="flex flex-col gap-0.5">
+          <div className="flex flex-col gap-0.5 min-w-0">
             <div className="flex items-center gap-1.5">
-              <div className="whitespace-nowrap text-sm">{symbol}</div>
-              <div className="flex items-center gap-1.5 cursor-pointer group/tokenname">
-                <div className="opacity-50 text-[11px] truncate max-w-[100px] group-hover/tokenname:opacity-70 transition-opacity">
+              <div className="whitespace-nowrap text-sm font-medium">{symbol}</div>
+              <div className="flex items-center gap-1.5 cursor-pointer group/tokenname min-w-0">
+                <div className="opacity-60 text-[11px] truncate max-w-[100px] group-hover/tokenname:opacity-80 transition-opacity">
                   {name}
                 </div>
-                <button type="button" onClick={handleCopyAddress}>
+                <button type="button" onClick={handleCopyAddress} className="text-genius-cream/80 hover:text-genius-cream">
                   <CopyIcon />
                 </button>
               </div>
-              <button type="button" onClick={handleShareUrl}>
+              <button type="button" className="text-genius-cream/80 hover:text-genius-cream">
                 <ShareIcon />
               </button>
               <StarSmallIcon />
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-genius-cream/90">
               <div className="flex gap-2 items-center">
                 {twitterUrl && (
                   <a
-                    className="rounded-md flex items-center justify-center text-xs bg-transparent size-3.5!"
+                    className="rounded-md flex items-center justify-center text-xs bg-transparent size-3.5 text-genius-cream/90 hover:text-genius-cream hover:opacity-100 transition-opacity"
                     target="_blank"
                     rel="noreferrer"
                     href={twitterUrl}
@@ -180,7 +180,7 @@ export function TopBar({
                 )}
                 {primaryWebsite && (
                   <a
-                    className="rounded-md flex items-center justify-center text-xs bg-transparent size-3.5!"
+                    className="rounded-md flex items-center justify-center text-xs bg-transparent size-3.5 text-genius-cream/90 hover:text-genius-cream hover:opacity-100 transition-opacity"
                     target="_blank"
                     rel="noreferrer"
                     href={primaryWebsite}
@@ -190,7 +190,7 @@ export function TopBar({
                 )}
                 {dexscreenerUrl && (
                   <a
-                    className="rounded-md flex items-center justify-center text-xs bg-transparent size-3.5!"
+                    className="rounded-md flex items-center justify-center text-xs bg-transparent size-3.5 text-genius-cream/90 hover:text-genius-cream hover:opacity-100 transition-opacity"
                     target="_blank"
                     href={dexscreenerUrl}
                   >
@@ -205,8 +205,8 @@ export function TopBar({
         </div>
 
         {/* Price + 24h change */}
-        <div className="flex flex-col whitespace-nowrap">
-          <div className="flex flex-row items-center gap-2" style={{ width: 145 }}>
+        <div className="flex flex-col whitespace-nowrap shrink-0">
+          <div className="flex flex-row items-center gap-2 min-w-[120px]">
             <span
               className={`text-lg font-bold tracking-tight text-genius-cream transition-all duration-300 ${
                 priceFlash === "up"
@@ -240,63 +240,61 @@ export function TopBar({
           </div>
         </div>
 
-        {/* Stat items */}
-        <div className="flex flex-col whitespace-nowrap">
-          <div className="text-genius-cream/50 text-xs whitespace-nowrap">Volume</div>
-          <div className="text-genius-cream text-sm" style={{ width: 57 }}>
+        {/* Stat items – flexible min-width, no fixed width to avoid truncation */}
+        <div className="flex flex-col whitespace-nowrap shrink-0">
+          <div className="text-genius-cream/65 text-xs whitespace-nowrap">Volume</div>
+          <div className="text-genius-cream text-sm min-w-0 truncate max-w-[80px]" title={formatNumber(metadata.volume?.h24 ?? 0)}>
             ${formatNumber(metadata.volume?.h24 ?? 0)}
           </div>
         </div>
-        <div className="flex flex-col whitespace-nowrap">
-          <div className="text-genius-cream/50 text-xs whitespace-nowrap">M.Cap</div>
-          <div className="text-genius-cream text-sm" style={{ width: 66 }}>
+        <div className="flex flex-col whitespace-nowrap shrink-0">
+          <div className="text-genius-cream/65 text-xs whitespace-nowrap">M.Cap</div>
+          <div className="text-genius-cream text-sm min-w-0 truncate max-w-[72px]" title={formatNumber(metadata.marketCap ?? metadata.fdv ?? 0)}>
             ${formatNumber(metadata.marketCap ?? metadata.fdv ?? 0)}
           </div>
         </div>
-        <div className="flex flex-col whitespace-nowrap">
-          <div className="text-genius-cream/50 text-xs whitespace-nowrap">Liquidity</div>
-          <div className="text-genius-cream text-sm" style={{ width: 61 }}>
+        <div className="flex flex-col whitespace-nowrap shrink-0">
+          <div className="text-genius-cream/65 text-xs whitespace-nowrap">Liquidity</div>
+          <div className="text-genius-cream text-sm min-w-0 truncate max-w-[72px]" title={formatNumber(metadata.liquidity?.usd ?? 0)}>
             ${formatNumber(metadata.liquidity?.usd ?? 0)}
           </div>
         </div>
-        <div className="flex flex-col whitespace-nowrap">
-          <div className="text-genius-cream/50 text-xs whitespace-nowrap">Holders</div>
-          <div className="text-genius-cream text-sm" style={{ width: 63 }}>
+        <div className="flex flex-col whitespace-nowrap shrink-0">
+          <div className="text-genius-cream/65 text-xs whitespace-nowrap">Holders</div>
+          <div className="text-genius-cream text-sm min-w-0 truncate max-w-[64px]">
             {holdersCount != null ? holdersCount.toLocaleString() : "—"}
           </div>
         </div>
-        <div className="flex flex-col whitespace-nowrap">
-          <div className="text-genius-cream/50 text-xs whitespace-nowrap">Age</div>
-          <div className="text-genius-cream text-sm" style={{ width: 84 }}>
+        <div className="flex flex-col whitespace-nowrap shrink-0">
+          <div className="text-genius-cream/65 text-xs whitespace-nowrap">Age</div>
+          <div className="text-genius-cream text-sm min-w-0 truncate max-w-[88px]">
             {ageStr}
           </div>
         </div>
-        <div className="flex flex-col whitespace-nowrap">
-          <div className="text-genius-cream/50 text-xs whitespace-nowrap">Supply</div>
-          <div className="text-genius-cream text-sm" style={{ width: 41 }}>
+        <div className="flex flex-col whitespace-nowrap shrink-0">
+          <div className="text-genius-cream/65 text-xs whitespace-nowrap">Supply</div>
+          <div className="text-genius-cream text-sm min-w-0 truncate max-w-[56px]">
             {totalSupply != null ? formatNumber(totalSupply) : "—"}
           </div>
         </div>
-        <div className="flex flex-col whitespace-nowrap">
-          <div className="text-genius-cream/50 text-xs whitespace-nowrap">Buy Pressure</div>
-          <div className="text-sm text-genius-green" style={{ width: 76 }}>
-            +{buyPressure.toFixed(1)}%
+        <div className="flex flex-col whitespace-nowrap shrink-0">
+          <div className="text-genius-cream/65 text-xs whitespace-nowrap">Buy Pressure</div>
+          <div
+            className={`text-sm min-w-0 truncate max-w-[72px] ${buyPressurePositive ? "text-genius-green" : "text-genius-red"}`}
+            title={`${buyPressure.toFixed(1)}%`}
+          >
+            {buyPressurePositive ? "+" : ""}{buyPressureDelta.toFixed(1)}%
           </div>
         </div>
 
         {/* Settings / network / verified */}
         <button
           type="button"
-          className="hover:opacity-70 transition-opacity cursor-pointer flex items-center justify-center"
+          className="hover:opacity-70 transition-opacity cursor-pointer flex items-center justify-center shrink-0"
         >
           <SettingsCogIcon className="text-genius-cream" />
         </button>
-        <div className="relative flex items-center gap-2">
-          {/* Network dropdown via MarketSelector (compact) */}
-          <div className="relative">
-            <MarketSelector chainId={chainId} tokenAddress={tokenAddress} onPoolSelect={onPoolSelect} />
-          </div>
-          {/* Verified badge */}
+        <div className="relative flex items-center gap-2 shrink-0">
           <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-sm text-sm cursor-pointer border border-genius-blue lg:hover:bg-genius-blue transition-colors">
             <div className="relative overflow-hidden w-[22px] h-[22px]">
               <img
@@ -308,10 +306,6 @@ export function TopBar({
           </div>
         </div>
 
-        {/* Global search stays at end on wide screens */}
-        <div className="hidden xl:flex">
-          <GlobalSearch />
-        </div>
       </div>
     </div>
   );

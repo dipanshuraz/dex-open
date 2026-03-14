@@ -20,22 +20,16 @@ export function HoldersTable({
     }
   }, []);
 
-  const getRankColor = (rank: number) => {
-    if (rank === 1) return "text-yellow-400";
-    if (rank === 2) return "text-teal-300";
-    if (rank === 3) return "text-orange-400";
-    return "text-gray-400";
-  };
-
   return (
     <div className="w-full flex-1 flex flex-col font-sans h-full bg-genius-indigo text-genius-cream">
-      <div className="grid grid-cols-[1.2fr_3fr_1fr_minmax(200px,2.2fr)_1fr] items-center px-4 py-2.5 bg-genius-indigo border-b border-genius-blue text-sm leading-5 font-medium text-genius-cream/80">
-        <div>Holders</div>
-        <div />
-        <div className="text-right">%</div>
-        <div className="text-right">Amount</div>
-        <div className="text-right">Value</div>
-      </div>
+      <header className="sticky top-0 z-10 w-full shrink-0">
+        <div className="grid grid-cols-[1fr_60px_2fr_100px] w-full px-5 py-1.5 bg-genius-blue/50 items-center gap-2">
+          <div className="text-genius-cream/60 whitespace-nowrap text-xs">Holders</div>
+          <div className="text-genius-cream/60 whitespace-nowrap text-xs text-right">%</div>
+          <div className="text-genius-cream/60 whitespace-nowrap text-xs text-right">Amount</div>
+          <div className="text-genius-cream/60 whitespace-nowrap text-xs text-right">Value</div>
+        </div>
+      </header>
 
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         {loading && holders.length === 0 && (
@@ -43,7 +37,7 @@ export function HoldersTable({
             {[1, 2, 3, 4, 5].map((i) => (
               <div
                 key={i}
-                className="h-8 w-full bg-black/5 dark:bg-white/5 animate-pulse rounded"
+                className="h-[54px] w-full bg-black/5 dark:bg-white/5 animate-pulse rounded"
               ></div>
             ))}
           </div>
@@ -55,43 +49,40 @@ export function HoldersTable({
           {holders.map((holder: Holder) => {
             const percent = holder.percentage ?? 0;
             const clamped = Math.min(Math.max(percent, 0), 100);
-            const filledSegments = Math.round((clamped / 100) * 40); // 40 tiny bars
+            const filledSegments = Math.round((clamped / 100) * 40);
 
             return (
               <div
                 key={holder.address}
-                className="grid grid-cols-[1.2fr_3fr_1fr_minmax(200px,2.2fr)_1fr] items-center gap-3 px-4 py-2.5 hover:bg-genius-blue/40 transition-colors border-b border-genius-blue text-sm leading-5 font-medium"
+                className="flex flex-row w-full px-5 py-2.5 h-[54px] items-center transition-colors hover:bg-genius-blue cursor-pointer border-b border-genius-blue/50"
               >
-                {/* Rank */}
-                <div className="flex items-center gap-1">
-                  <span className={getRankColor(holder.rank)}>#{holder.rank}</span>
+                {/* Rank + Address */}
+                <div className="w-[calc(25%-1rem)] flex items-center gap-2 min-w-0">
+                  <div className="text-sm text-[#e5ca7c] shrink-0">
+                    <span className="opacity-50">#</span>
+                    {holder.rank}
+                  </div>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => handleCopy(holder.address)}
+                    className="w-fit text-sm text-genius-cream hover:opacity-70 transition-opacity border-2 border-dotted border-genius-blue rounded-sm px-1 truncate"
+                  >
+                    {truncateAddress(holder.address)}
+                  </button>
                 </div>
-
-                {/* Address with copy pill */}
-                <button
-                  type="button"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => handleCopy(holder.address)}
-                  className="flex items-center gap-1 min-w-[140px] text-genius-cream hover:text-genius-cream/80 cursor-pointer truncate mr-2"
-                >
-                  <span>{truncateAddress(holder.address)}</span>
-                  <span className="text-[9px] text-genius-cream/70 border border-genius-blue rounded px-1 py-0.5">
-                    copy
-                  </span>
-                </button>
 
                 {/* Percentage */}
-                <div className="text-right text-genius-cream">
-                  {holder.percentage !== null ? `${holder.percentage.toFixed(2)}%` : "—"}
+                <div className="w-[60px] flex flex-col text-right shrink-0">
+                  <span className="text-sm">
+                    {holder.percentage !== null ? `${holder.percentage.toFixed(2)}%` : "—"}
+                  </span>
                 </div>
 
-                {/* Amount with advanced progress bar */}
-                <div className="w-[calc(50%-1rem)] ml-auto flex justify-end items-center gap-2">
-                  <div className="text-sm">{formatNumber(holder.balance)}</div>
-                  <div
-                    className="flex flex-row"
-                    style={{ height: 12, gap: 1 }}
-                  >
+                {/* Amount + progress bar + amount */}
+                <div className="w-[calc(50%-1rem)] flex justify-end items-center gap-2 min-w-0">
+                  <span className="text-sm shrink-0">{formatNumber(holder.balance)}</span>
+                  <div className="flex flex-row shrink-0" style={{ height: 12, gap: 1 }}>
                     {Array.from({ length: 40 }).map((_, idx) => {
                       const filled = idx < filledSegments;
                       const isPink = idx < filledSegments / 2;
@@ -111,14 +102,14 @@ export function HoldersTable({
                       );
                     })}
                   </div>
-                  <div className="text-sm text-genius-cream/80">
-                    {formatNumber(holder.balance)}
-                  </div>
+                  <span className="text-sm shrink-0">{formatNumber(holder.balance)}</span>
                 </div>
 
                 {/* Value */}
-                <div className="text-right text-genius-cream">
-                  {holder.valueUsd != null ? formatCurrency(holder.valueUsd) : "—"}
+                <div className="w-[100px] ml-auto flex flex-col text-right shrink-0">
+                  <span className="text-sm">
+                    {holder.valueUsd != null ? formatCurrency(holder.valueUsd) : "—"}
+                  </span>
                 </div>
               </div>
             );

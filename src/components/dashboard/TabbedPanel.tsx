@@ -5,7 +5,8 @@ import { TradesTable } from "./TradesTable";
 import { HoldersTable } from "./HoldersTable";
 import { PoolsTable } from "./PoolsTable";
 import { TableEmptyState } from "./TableEmptyState";
-import { PanelRightClose, Zap, ArrowUpDown, ChevronDown, EyeOff, RefreshCcw } from "lucide-react";
+import { PanelRightClose, Zap, ListFilter, ArrowUpDown, ChevronDown } from "lucide-react";
+import { Switch } from "@/components/ui/Switch";
 
 type Tab =
   | "trades"
@@ -52,9 +53,7 @@ export function TabbedPanel({
 }) {
   const [activeTab, setActiveTab] = useState<Tab>("trades");
   const [btcOnly, setBtcOnly] = useState(false);
-  const [smallTradesOnly, setSmallTradesOnly] = useState(false);
   const [panelVisible, setPanelVisible] = useState(true);
-  const [isUsdAscending, setIsUsdAscending] = useState(true);
 
   const showTrades = activeTab === "trades";
   const showPools = activeTab === "pools";
@@ -68,9 +67,9 @@ export function TabbedPanel({
 
   return (
     <div className="h-full flex flex-col bg-genius-indigo border-t border-r border-genius-blue">
-      {/* Tabs + right controls row */}
-      <div className="flex justify-between items-center gap-2 pl-3 min-h-[45px] h-[45px] shrink-0">
-        <div className="flex items-center gap-1">
+      {/* Tab bar + action bar: single row, justify-between, 45px height */}
+      <div className="flex justify-between items-center gap-2 pl-3 min-h-[45px] h-[45px] shrink-0 border-b border-genius-blue/80 bg-genius-indigo">
+        <div className="flex items-center gap-1 shrink-0 overflow-x-auto scrollbar-hide">
           {TABS.map((tab) => {
             const isActive = activeTab === tab.key;
             return (
@@ -78,7 +77,7 @@ export function TabbedPanel({
                 key={tab.key}
                 type="button"
                 onClick={() => setActiveTab(tab.key)}
-                className={`cursor-pointer transition-colors rounded-sm px-2 py-0.5 text-sm whitespace-nowrap ${
+                className={`cursor-pointer transition-colors rounded-sm px-2 py-0.5 text-sm whitespace-nowrap shrink-0 ${
                   isActive
                     ? "text-genius-cream bg-genius-blue"
                     : "text-genius-cream/60 bg-transparent hover:bg-genius-blue hover:text-genius-cream"
@@ -90,101 +89,41 @@ export function TabbedPanel({
           })}
         </div>
 
-        <div className="relative overflow-hidden shrink-0">
+        <div className="relative overflow-hidden flex-1 min-w-0 flex justify-end">
           <div className="absolute top-0 left-0 w-3 h-full bg-linear-to-r from-genius-indigo to-transparent z-10 pointer-events-none" />
           <div className="absolute top-0 right-0 w-3 h-full bg-linear-to-l from-genius-indigo to-transparent z-10 pointer-events-none" />
-          <div className="flex items-center gap-3 overflow-x-auto px-3">
-            {/* Trades Panel button (visual only) */}
+          <div className="flex items-center gap-3 overflow-x-auto px-3 scrollbar-hide py-1">
             <button
               type="button"
-              className="inline-flex items-center gap-1.5 px-2 py-[3px] rounded-sm border border-genius-blue text-xs bg-transparent hover:brightness-110 transition-all text-genius-cream/80"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-sm text-md ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 border border-genius-blue gap-1.5 py-[3px] px-2 lg:text-xs text-genius-cream"
               onClick={() => setPanelVisible((v) => !v)}
             >
               Trades Panel
               <PanelRightClose className="w-3.5 h-3.5" aria-hidden />
             </button>
 
-            {/* Eye off toggle */}
-            <button
-              type="button"
-              className="inline-flex items-center justify-center px-2 py-[4px] rounded-sm border border-genius-blue text-xs bg-transparent hover:brightness-110 transition-all text-genius-cream/80"
-              aria-pressed={!panelVisible}
-              onClick={() => setPanelVisible((v) => !v)}
-            >
-              <EyeOff className="w-3.5 h-3.5" aria-hidden />
-            </button>
-
-            {/* USD button */}
-            <button
-              type="button"
-              className="inline-flex items-center gap-1.5 px-2 py-[3px] rounded-sm border border-genius-blue text-xs bg-transparent hover:brightness-110 transition-all text-genius-cream/80"
-              onClick={() => setIsUsdAscending((v) => !v)}
-            >
-              USD
-              <ArrowUpDown className="w-3.5 h-3.5" aria-hidden />
-            </button>
-
-            {/* < $1 toggle */}
-            <div className="flex flex-row items-center gap-1.5">
-              <span className="text-xs text-genius-cream cursor-pointer hover:text-genius-cream/80 transition-colors select-none whitespace-nowrap">
-                &lt;$1
-              </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={smallTradesOnly}
-                aria-label="Only trades below $1"
-                data-state={smallTradesOnly ? "checked" : "unchecked"}
-                onClick={() => setSmallTradesOnly((v) => !v)}
-                className={`inline-flex shrink-0 cursor-pointer items-center border-2 border-transparent transition-colors h-4 w-7 rounded-[2px] ${
-                  smallTradesOnly ? "bg-genius-pink" : "bg-genius-blue"
-                }`}
-              >
-                <span
-                  className={`pointer-events-none block shadow-lg h-3 w-3 rounded-[2px] transition-transform ${
-                    smallTradesOnly ? "translate-x-[12px] bg-genius-blue" : "translate-x-0 bg-genius-pink"
-                  }`}
-                />
-              </button>
-            </div>
-
-            {/* BTC Only toggle */}
             <div className="flex flex-row items-center gap-1.5">
               <span className="text-xs text-genius-cream cursor-pointer hover:text-genius-cream/80 transition-colors select-none whitespace-nowrap">
                 BTC Only
               </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={btcOnly}
-                aria-label="BTC Only filter"
-                data-state={btcOnly ? "checked" : "unchecked"}
-                onClick={() => setBtcOnly((v) => !v)}
-                className={`inline-flex shrink-0 cursor-pointer items-center border-2 border-transparent transition-colors h-4 w-7 rounded-[2px] ${
-                  btcOnly ? "bg-genius-pink" : "bg-genius-blue"
-                }`}
-              >
-                <span
-                  className={`pointer-events-none block shadow-lg h-3 w-3 rounded-[2px] transition-transform ${
-                    btcOnly ? "translate-x-[12px] bg-genius-blue" : "translate-x-0 bg-genius-pink"
-                  }`}
-                />
-              </button>
+              <Switch
+                checked={btcOnly}
+                onCheckedChange={setBtcOnly}
+                aria-label="Toggle degen"
+              />
             </div>
 
-            {/* Refresh */}
             <button
               type="button"
-              className="inline-flex items-center justify-center px-2 py-[4px] rounded-sm border border-genius-blue text-xs bg-transparent hover:brightness-110 transition-all text-genius-cream/80"
-              aria-label="Refresh"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-sm text-md ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 border border-genius-blue gap-1.5 py-[3px] px-2 lg:text-xs text-genius-cream"
             >
-              <RefreshCcw className="w-3.5 h-3.5" aria-hidden />
+              Filter
+              <ListFilter className="w-3.5 h-3.5" aria-hidden />
             </button>
 
-            {/* Instant Trade */}
             <button
               type="button"
-              className="inline-flex items-center gap-1.5 lg:text-xs py-1 px-2 bg-genius-pink/20 text-genius-pink rounded-sm"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-sm text-md ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 gap-1.5 py-1 px-2 lg:text-xs bg-genius-pink/20 text-genius-pink"
             >
               <Zap className="w-3.5 h-3.5" aria-hidden />
               Instant Trade
@@ -193,26 +132,28 @@ export function TabbedPanel({
         </div>
       </div>
 
-      {/* Table headers for empty-state tabs (Position, Traders, Orders, History, Exited) */}
+      {/* Table headers for empty-state tabs (Position, Traders, Orders, History, Exited) – same design as TradesTable */}
       {showEmptyState && (
-        <div className="grid grid-cols-[1fr_1fr_0.8fr_1fr_0.8fr_1fr_1fr_auto] items-center gap-2 px-4 py-2.5 bg-genius-indigo border-b border-genius-blue text-sm font-medium text-genius-cream/80 shrink-0">
-          {POSITION_HEADERS.map((h) => (
-            <div
-              key={h.label}
-              className={`flex items-center gap-1 ${h.sortable ? "cursor-pointer hover:text-genius-cream transition-colors" : ""}`}
+        <header className="sticky top-0 z-10 w-full shrink-0">
+          <div className="grid grid-cols-[1fr_1fr_0.8fr_1fr_0.8fr_1fr_1fr_auto] w-full px-5 py-1.5 bg-genius-blue/50 items-center gap-2">
+            {POSITION_HEADERS.map((h) => (
+              <div
+                key={h.label}
+                className={`text-genius-cream/60 whitespace-nowrap text-xs flex items-center gap-1 ${h.sortable ? "cursor-pointer hover:opacity-70 transition-opacity" : ""}`}
+              >
+                {h.label}
+                {h.sortable && <ArrowUpDown className="w-3 h-3 shrink-0" aria-hidden />}
+              </div>
+            ))}
+            <button
+              type="button"
+              className="p-0.5 text-genius-cream/50 hover:text-genius-cream transition-colors"
+              aria-label="Column settings"
             >
-              {h.label}
-              {h.sortable && <ArrowUpDown className="w-3 h-3 shrink-0" aria-hidden />}
-            </div>
-          ))}
-          <button
-            type="button"
-            className="p-0.5 text-genius-cream/50 hover:text-genius-cream transition-colors"
-            aria-label="Column settings"
-          >
-            <ChevronDown className="w-3.5 h-3.5" aria-hidden />
-          </button>
-        </div>
+              <ChevronDown className="w-3.5 h-3.5" aria-hidden />
+            </button>
+          </div>
+        </header>
       )}
 
       {/* Tab content */}

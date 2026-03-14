@@ -11,6 +11,7 @@ import {
   Fuel,
 } from "lucide-react";
 import Image from "next/image";
+import { Switch } from "@/components/ui/Switch";
 
 type OrderMode = "buy" | "sell";
 type OrderType = "market" | "limit";
@@ -48,10 +49,11 @@ export function TradingControls() {
   const [timeInForce, setTimeInForce] = useState("GTC");
   const [slippage, setSlippage] = useState("0.5");
   const [priorityGwei, setPriorityGwei] = useState("0");
+  const hasSelectedAsset = false;
 
   return (
     <div className="relative flex flex-col gap-0">
-      <div className="relative h-fit bg-genius-indigo p-4 border-l-0! shadow-none! rounded-none rounded-r-md rounded-br-none rounded-tr-none border-0">
+      <div className="relative h-fit bg-genius-indigo p-4 border-0 border-l-0 shadow-none rounded-none">
         <div className="relative flex flex-col gap-2.5">
           {/* Buy / Sell + collapse chevron */}
           <div className="w-full flex items-center gap-2">
@@ -82,7 +84,7 @@ export function TradingControls() {
             <button
               type="button"
               onClick={() => setIsExpanded((e) => !e)}
-              className="cursor-pointer hover:opacity-70 transition-opacity border border-genius-blue rounded-full p-1"
+              className="cursor-pointer hover:opacity-70 transition-opacity border border-genius-blue rounded-full p-1 shrink-0"
               aria-label={isExpanded ? "Collapse" : "Expand"}
             >
               <ChevronDown
@@ -130,30 +132,34 @@ export function TradingControls() {
                 <div className="flex items-center gap-1.5">
                   <span className="text-[10px] text-genius-cream/50">Balance</span>
                 </div>
-                <div className="flex justify-between items-center bg-genius-blue cursor-pointer hover:brightness-75 transition-all py-2 px-2.5 rounded-sm text-sm pointer-events-none">
-                  <div className="text-xs text-genius-cream/50 py-1">No selectable asset</div>
-                </div>
+                <button
+                  type="button"
+                  className="flex justify-between items-center w-full bg-genius-blue cursor-pointer hover:brightness-75 transition-all py-2 px-2.5 rounded-sm text-sm text-left"
+                  aria-label="Select asset"
+                >
+                  <span className="text-xs text-genius-cream/50 py-1">No selectable asset</span>
+                </button>
               </div>
 
-              {/* Amount */}
+              {/* Amount — disabled/faded when no asset selected */}
               <div
-                className={`relative flex flex-row gap-2 ${orderType === "limit" ? "opacity-50 pointer-events-none" : ""}`}
+                className={`relative flex flex-row gap-2 ${!hasSelectedAsset ? "opacity-50 pointer-events-none" : ""}`}
               >
                 <div className="flex flex-col gap-1.5 w-full">
                   <div className="w-fit flex items-center gap-2 text-[10px] text-genius-cream/50">
-                    <div className="flex items-center gap-1 hover:text-genius-cream transition-colors cursor-pointer select-none">
+                    <span className="flex items-center gap-1 hover:text-genius-cream transition-colors cursor-pointer select-none">
                       Amount <ArrowRightLeft className="w-2.5 h-2.5" aria-hidden />
-                    </div>
+                    </span>
                   </div>
                   <div className="w-full flex flex-row items-center gap-2">
-                    <div className="relative text-sm w-full flex rounded-sm border border-genius-blue bg-transparent ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+                    <div className="relative text-sm w-full">
                       <input
                         type="text"
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
-                        className="flex-1 min-w-0 bg-transparent p-3.5 outline-none text-sm placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 px-4 py-2 border-none"
+                        className="flex w-full rounded-sm border border-genius-blue bg-transparent p-3.5 ring-offset-background file:border-0 file:bg-transparent file:text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 px-4 py-2 pr-14"
                       />
-                      <span className="text-xs pointer-events-none text-genius-cream/50 py-2 pr-4 shrink-0">
+                      <span className="absolute top-1/2 -translate-y-1/2 right-4 text-xs pointer-events-none text-genius-cream/50">
                         ≈ $NaN
                       </span>
                     </div>
@@ -245,43 +251,21 @@ export function TradingControls() {
               {/* Take Profit - Stop Loss */}
               <div className="flex justify-between items-center">
                 <div className="text-[10px] text-genius-cream/50">Take Profit - Stop Loss</div>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={takeProfitStopLoss}
+                <Switch
+                  checked={takeProfitStopLoss}
+                  onCheckedChange={setTakeProfitStopLoss}
                   aria-label="Toggle Take Profit - Stop Loss"
-                  onClick={() => setTakeProfitStopLoss((v) => !v)}
-                  className="peer inline-flex shrink-0 cursor-pointer items-center border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 h-4 w-7 rounded-[2px] data-[state=checked]:bg-genius-pink data-[state=unchecked]:bg-genius-blue"
-                  data-state={takeProfitStopLoss ? "checked" : "unchecked"}
-                >
-                  <span
-                    className={`pointer-events-none block bg-background shadow-lg ring-2 ring-genius-blue transition-transform h-3 w-3 rounded-[2px] ${
-                      takeProfitStopLoss
-                        ? "translate-x-[12px] bg-genius-blue"
-                        : "translate-x-0 bg-genius-pink ring-genius-pink"
-                    }`}
-                  />
-                </button>
+                />
               </div>
 
               {/* Fast Swaps Enabled */}
               <div className="flex justify-between items-center">
                 <div className="text-[10px] text-genius-cream/50">Fast Swaps Enabled</div>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={fastSwaps}
+                <Switch
+                  checked={fastSwaps}
+                  onCheckedChange={setFastSwaps}
                   aria-label="Toggle Fast Swaps"
-                  onClick={() => setFastSwaps((v) => !v)}
-                  className="peer inline-flex shrink-0 cursor-pointer items-center border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 h-4 w-7 rounded-[2px] data-[state=checked]:bg-genius-pink data-[state=unchecked]:bg-genius-blue"
-                  data-state={fastSwaps ? "checked" : "unchecked"}
-                >
-                  <span
-                    className={`pointer-events-none block bg-background shadow-lg ring-2 ring-genius-blue transition-transform h-3 w-3 rounded-[2px] ${
-                      fastSwaps ? "translate-x-[12px] bg-genius-blue" : "translate-x-0 bg-genius-pink ring-genius-pink"
-                    }`}
-                  />
-                </button>
+                />
               </div>
 
               {/* Action button: Market = Deposit To Continue, Limit = Under Maintenance */}
@@ -339,8 +323,8 @@ export function TradingControls() {
                       className="flex w-full border p-3.5 ring-offset-background file:border-0 file:bg-transparent file:text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 py-1 border-none bg-genius-blue/40 text-center text-xs rounded-none border-b border-genius-blue"
                     />
                   </div>
-                  <div className="h-full flex justify-center items-center gap-1 py-1.5 px-2 text-[10px] uppercase leading-none opacity-50">
-                    <span className="size-2.5 text-genius-cream/80 flex shrink-0">
+                  <div className="h-full flex justify-center items-center gap-1 py-1.5 px-2 text-[10px] uppercase leading-none opacity-50 text-genius-cream">
+                    <span className="size-2.5 flex shrink-0 [&>svg]:text-genius-cream">
                       <SlippageIcon className="size-2.5" />
                     </span>
                     Slippage %
@@ -357,7 +341,7 @@ export function TradingControls() {
                     <div className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none">
                       <Image
                         src="https://www.tradegenius.com/static/geniusImages/advanced_network_logos/ethereum.png"
-                        alt=""
+                        alt="native"
                         width={12}
                         height={12}
                         unoptimized
@@ -365,7 +349,7 @@ export function TradingControls() {
                       />
                     </div>
                   </div>
-                  <div className="h-full flex justify-center items-center gap-1 py-1.5 px-2 text-[10px] uppercase leading-none opacity-50">
+                  <div className="h-full flex justify-center items-center gap-1 py-1.5 px-2 text-[10px] uppercase leading-none opacity-50 text-genius-cream">
                     <Fuel className="size-2.5" aria-hidden />
                     Priority (Gwei)
                   </div>
