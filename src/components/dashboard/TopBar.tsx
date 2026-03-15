@@ -172,10 +172,10 @@ export function TopBar({
             <div className="flex items-center gap-2 text-genius-cream/90">
               <div className="flex gap-2 items-center">
                         {([
-                  { href: twitterUrl,     Icon: TwitterFillIcon, label: "Twitter",    rel: "noreferrer" },
-                  { href: primaryWebsite, Icon: EarthIcon,        label: "Website",    rel: "noreferrer" },
-                  { href: dexscreenerUrl, Icon: DexScreenerIcon,  label: "DexScreener" },
-                ] as const).filter((s) => s.href).map(({ href, Icon, label, rel }) => (
+                  { href: twitterUrl,     Icon: TwitterFillIcon, label: "Twitter",     rel: "noreferrer" as const },
+                  { href: primaryWebsite, Icon: EarthIcon,        label: "Website",    rel: "noreferrer" as const },
+                  { href: dexscreenerUrl, Icon: DexScreenerIcon,  label: "DexScreener", rel: undefined },
+                ]).filter((s) => s.href).map(({ href, Icon, label, rel }) => (
                   <a
                     key={label}
                     className="rounded-md flex items-center justify-center text-xs bg-transparent size-3.5 text-genius-cream/90 hover:text-genius-cream hover:opacity-100 transition-opacity"
@@ -228,20 +228,22 @@ export function TopBar({
           </div>
         </div>
 
-        {([
-          { label: "Volume",       value: `$${formatNumber(metadata.volume?.h24 ?? 0)}`,                     title: formatNumber(metadata.volume?.h24 ?? 0) },
-          { label: "M.Cap",        value: `$${formatNumber(metadata.marketCap ?? metadata.fdv ?? 0)}`,        title: formatNumber(metadata.marketCap ?? metadata.fdv ?? 0) },
-          { label: "Liquidity",    value: `$${formatNumber(metadata.liquidity?.usd ?? 0)}`,                   title: formatNumber(metadata.liquidity?.usd ?? 0) },
-          { label: "Holders",      value: holdersCount != null ? holdersCount.toLocaleString() : "—" },
-          { label: "Age",          value: ageStr },
-          { label: "Supply",       value: totalSupply != null ? formatNumber(totalSupply) : "—" },
-          {
-            label: "Buy Pressure",
-            value: `${buyPressurePositive ? "+" : ""}${buyPressureDelta.toFixed(1)}%`,
-            title: `${buyPressure.toFixed(1)}%`,
-            valueClassName: buyPressurePositive ? "text-genius-green" : "text-genius-red",
-          },
-        ] as const).map(({ label, value, title, valueClassName }) => (
+        {(
+          [
+            { label: "Volume",       value: `$${formatNumber(metadata.volume?.h24 ?? 0)}`,                    title: formatNumber(metadata.volume?.h24 ?? 0) },
+            { label: "M.Cap",        value: `$${formatNumber(metadata.marketCap ?? metadata.fdv ?? 0)}`,       title: formatNumber(metadata.marketCap ?? metadata.fdv ?? 0) },
+            { label: "Liquidity",    value: `$${formatNumber(metadata.liquidity?.usd ?? 0)}`,                  title: formatNumber(metadata.liquidity?.usd ?? 0) },
+            { label: "Holders",      value: holdersCount != null ? holdersCount.toLocaleString() : "—" },
+            { label: "Age",          value: ageStr },
+            { label: "Supply",       value: totalSupply != null ? formatNumber(totalSupply) : "—" },
+            {
+              label: "Buy Pressure",
+              value: `${buyPressurePositive ? "+" : ""}${buyPressureDelta.toFixed(1)}%`,
+              title: `${buyPressure.toFixed(1)}%`,
+              valueClassName: buyPressurePositive ? "text-genius-green" : "text-genius-red",
+            },
+          ] as { label: string; value: string; title?: string; valueClassName?: string }[]
+        ).map(({ label, value, title, valueClassName }) => (
           <div key={label} className="flex flex-col whitespace-nowrap shrink-0">
             <div className="text-genius-cream/65 text-xs whitespace-nowrap">{label}</div>
             <div
