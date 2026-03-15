@@ -16,6 +16,7 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useTokenPageStats } from "@/hooks/useTokenPageStats";
 import { validateTokenRoute } from "@/lib/validation";
 import { SIDEBAR_WIDTH } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 import type { TimeframeKey } from "@/types";
 
 interface Props {
@@ -54,12 +55,12 @@ export default function TokenPage({ params }: Props) {
 
   return (
     <div className="relative h-full min-h-0 bg-background text-white selection:bg-purple-500/30 font-sans flex flex-col overflow-hidden">
-      <main className="relative z-10 flex-1 flex min-h-0 overflow-hidden">
+      <section className="relative z-10 flex-1 flex min-h-0 overflow-hidden">
         <div
           ref={chartPanelContainerRef}
-          className="flex-1 flex flex-col min-h-0 min-w-0 p-0 gap-0 overflow-hidden bg-transparent"
+          className="flex-1 flex flex-col min-h-0 min-w-0 overflow-hidden"
         >
-          <div className="shrink-0 min-w-0 rounded-t-lg overflow-hidden border-genius-blue border-b-0">
+          <div className="shrink-0 min-w-0 overflow-hidden">
             <TopBar chainId={chain} tokenAddress={tokenAddress} />
           </div>
 
@@ -110,9 +111,10 @@ export default function TokenPage({ params }: Props) {
           style={{ width: isRightCollapsed ? 0 : SIDEBAR_WIDTH, minWidth: isRightCollapsed ? 0 : undefined }}
         >
           <div
-            className={`absolute right-0 top-0 bottom-0 flex flex-col overflow-y-auto border-l border-genius-blue bg-genius-indigo custom-scrollbar transition-all duration-300 ease-in-out ${
-              isRightCollapsed ? "opacity-0 pointer-events-none border-l-0" : "opacity-100"
-            }`}
+            className={cn(
+              "absolute right-0 top-0 bottom-0 flex flex-col overflow-y-auto border-l border-genius-blue bg-genius-indigo custom-scrollbar transition-all duration-300 ease-in-out",
+              isRightCollapsed && "opacity-0 pointer-events-none border-l-0"
+            )}
             style={{ width: isRightCollapsed ? 0 : SIDEBAR_WIDTH, maxWidth: isRightCollapsed ? 0 : SIDEBAR_WIDTH }}
           >
             <div className="flex flex-col gap-0 shrink-0 min-h-0">
@@ -146,13 +148,13 @@ export default function TokenPage({ params }: Props) {
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className={`w-3 h-3 text-genius-cream transition-transform ${isRightCollapsed ? "rotate-180" : ""}`}
+            className={cn("w-3 h-3 text-genius-cream transition-transform", isRightCollapsed && "rotate-180")}
             aria-hidden="true"
           >
             <path d="m9 18 6-6-6-6" />
           </svg>
         </button>
-      </main>
+      </section>
     </div>
   );
 }

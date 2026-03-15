@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { ReactNode } from "react";
 import {
   ChevronDown,
   RefreshCcw,
@@ -10,6 +11,7 @@ import {
   Bell,
   Fuel,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { Switch } from "@/components/ui/Switch";
 
@@ -35,6 +37,56 @@ function SlippageIcon({ className }: { className?: string }) {
   );
 }
 
+const ORDER_TYPES: { value: OrderType; label: string }[] = [
+  { value: "market", label: "Market" },
+  { value: "limit",  label: "Limit" },
+];
+
+const PRESETS = [1, 2, 3] as const;
+
+type ToggleSetting = { label: string; checked: boolean; onCheckedChange: (v: boolean) => void };
+
+function ToggleRow({ label, checked, onCheckedChange }: ToggleSetting) {
+  return (
+    <div className="flex justify-between items-center">
+      <div className="text-[10px] text-genius-cream/50">{label}</div>
+      <Switch checked={checked} onCheckedChange={onCheckedChange} aria-label={`Toggle ${label}`} />
+    </div>
+  );
+}
+
+type TradingField = {
+  value: string;
+  onChange: (v: string) => void;
+  icon: ReactNode;
+  label: string;
+  inputClassName?: string;
+  overlay?: ReactNode;
+};
+
+function TradingInputField({ value, onChange, icon, label, inputClassName, overlay }: TradingField) {
+  return (
+    <div className="w-full flex flex-col border border-genius-blue rounded-sm">
+      <div className="relative">
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={cn(
+            "flex w-full border p-3.5 ring-offset-background file:border-0 file:bg-transparent file:text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 py-1 border-none bg-genius-blue/40 text-center text-xs rounded-none border-b border-genius-blue",
+            inputClassName
+          )}
+        />
+        {overlay}
+      </div>
+      <div className="h-full flex justify-center items-center gap-1 py-1.5 px-2 text-[10px] uppercase leading-none opacity-50 text-genius-cream">
+        {icon}
+        {label}
+      </div>
+    </div>
+  );
+}
+
 export function TradingControls() {
   const [orderMode, setOrderMode] = useState<OrderMode>("buy");
   const [orderType, setOrderType] = useState<OrderType>("market");
@@ -52,35 +104,63 @@ export function TradingControls() {
   const [priorityGwei, setPriorityGwei] = useState("0");
   const hasSelectedAsset = false;
 
+  const toggleSettings: ToggleSetting[] = [
+    { label: "Take Profit - Stop Loss", checked: takeProfitStopLoss, onCheckedChange: setTakeProfitStopLoss },
+    { label: "Fast Swaps Enabled",      checked: fastSwaps,           onCheckedChange: setFastSwaps },
+  ];
+
+  const tradingFields: TradingField[] = [
+    {
+      value: slippage,
+      onChange: setSlippage,
+      icon: <span className="size-2.5 flex shrink-0 [&>svg]:text-genius-cream"><SlippageIcon className="size-2.5" /></span>,
+      label: "Slippage %",
+    },
+    {
+      value: priorityGwei,
+      onChange: setPriorityGwei,
+      icon: <Fuel className="size-2.5" aria-hidden />,
+      label: "Priority (Gwei)",
+      inputClassName: "pr-8",
+      overlay: (
+        <div className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none">
+          <Image
+            src="https://www.tradegenius.com/static/geniusImages/advanced_network_logos/ethereum.png"
+            alt="native"
+            width={12}
+            height={12}
+            unoptimized
+            className="object-contain"
+          />
+        </div>
+      ),
+    },
+  ];
+
   return (
-    <div className="relative flex flex-col gap-0">
-      <div className="relative h-fit bg-genius-indigo p-4 border-0 border-l-0 shadow-none rounded-none">
+    <div className="relative flex flex-col">
+      <div className="relative h-fit bg-genius-indigo p-4">
         <div className="relative flex flex-col gap-2.5">
           {/* Buy / Sell + collapse chevron */}
           <div className="w-full flex items-center gap-2">
             <div className="w-full flex gap-2">
-              <button
-                type="button"
-                onClick={() => setOrderMode("buy")}
-                className={`inline-flex p-4 items-center justify-center whitespace-nowrap rounded-sm text-md ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all flex-1 h-[36px] border lg:text-xs ${
-                  orderMode === "buy"
-                    ? "border-transparent text-genius-green bg-genius-green/20 lg:hover:brightness-100"
-                    : "bg-transparent text-genius-red border border-genius-blue lg:hover:brightness-75 hover:bg-genius-blue/80"
-                }`}
-              >
-                Buy
-              </button>
-              <button
-                type="button"
-                onClick={() => setOrderMode("sell")}
-                className={`inline-flex p-4 items-center justify-center whitespace-nowrap rounded-sm text-md ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all flex-1 h-[36px] border lg:text-xs ${
-                  orderMode === "sell"
-                    ? "border-transparent text-genius-red bg-genius-red/20 lg:hover:brightness-100"
-                    : "bg-transparent text-genius-red border border-genius-blue lg:hover:brightness-75 hover:bg-genius-blue/80"
-                }`}
-              >
-                Sell
-              </button>
+              {(["buy", "sell"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setOrderMode(mode)}
+                  className={cn(
+                    "inline-flex items-center justify-center whitespace-nowrap rounded-sm text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all flex-1 h-[36px] border lg:text-xs",
+                    orderMode === mode
+                      ? mode === "buy"
+                        ? "border-transparent text-genius-green bg-genius-green/20 lg:hover:brightness-100"
+                        : "border-transparent text-genius-red bg-genius-red/20 lg:hover:brightness-100"
+                      : "bg-transparent text-genius-red border-genius-blue lg:hover:brightness-75 hover:bg-genius-blue/80"
+                  )}
+                >
+                  {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                </button>
+              ))}
             </div>
             <button
               type="button"
@@ -89,7 +169,7 @@ export function TradingControls() {
               aria-label={isExpanded ? "Collapse" : "Expand"}
             >
               <ChevronDown
-                className={`w-3.5 h-3.5 transition-transform ${isExpanded ? "" : "-rotate-180"}`}
+                className={cn("w-3.5 h-3.5 transition-transform", !isExpanded && "-rotate-180")}
                 aria-hidden
               />
             </button>
@@ -100,24 +180,19 @@ export function TradingControls() {
               {/* Market / Limit + refresh */}
               <div className="flex justify-between items-center">
                 <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setOrderType("market")}
-                    className={`text-sm cursor-pointer hover:text-genius-cream transition-colors ${
-                      orderType === "market" ? "text-genius-cream" : "text-genius-cream/50"
-                    }`}
-                  >
-                    Market
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setOrderType("limit")}
-                    className={`text-sm cursor-pointer hover:text-genius-cream transition-colors ${
-                      orderType === "limit" ? "text-genius-cream" : "text-genius-cream/50"
-                    }`}
-                  >
-                    Limit
-                  </button>
+                  {ORDER_TYPES.map(({ value, label }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setOrderType(value)}
+                      className={cn(
+                        "text-sm cursor-pointer hover:text-genius-cream transition-colors",
+                        orderType === value ? "text-genius-cream" : "text-genius-cream/50"
+                      )}
+                    >
+                      {label}
+                    </button>
+                  ))}
                 </div>
                 <button
                   type="button"
@@ -144,7 +219,7 @@ export function TradingControls() {
 
               {/* Amount — disabled/faded when no asset selected */}
               <div
-                className={`relative flex flex-row gap-2 ${!hasSelectedAsset ? "opacity-50 pointer-events-none" : ""}`}
+                className={cn("relative flex flex-row gap-2", !hasSelectedAsset && "opacity-50 pointer-events-none")}
               >
                 <div className="flex flex-col gap-1.5 w-full">
                   <div className="w-fit flex items-center gap-2 text-[10px] text-genius-cream/50">
@@ -232,7 +307,7 @@ export function TradingControls() {
                   </div>
                   <div className="relative flex flex-col gap-1.5">
                     <div className="text-[10px] text-genius-cream/50">Time in Force</div>
-                    <div className="flex items-center gap-0">
+                    <div className="flex items-center">
                       <div className="flex grow justify-between items-center rounded-sm border border-genius-blue py-2 pl-4 pr-3 hover:opacity-70 transition-opacity cursor-pointer">
                         <div className="text-xs">{timeInForce}</div>
                         <ChevronDown className="w-4 h-4 transition-transform" aria-hidden />
@@ -249,34 +324,18 @@ export function TradingControls() {
                 </>
               )}
 
-              {/* Take Profit - Stop Loss */}
-              <div className="flex justify-between items-center">
-                <div className="text-[10px] text-genius-cream/50">Take Profit - Stop Loss</div>
-                <Switch
-                  checked={takeProfitStopLoss}
-                  onCheckedChange={setTakeProfitStopLoss}
-                  aria-label="Toggle Take Profit - Stop Loss"
-                />
-              </div>
+              {toggleSettings.map((s) => (
+                <ToggleRow key={s.label} {...s} />
+              ))}
 
-              {/* Fast Swaps Enabled */}
-              <div className="flex justify-between items-center">
-                <div className="text-[10px] text-genius-cream/50">Fast Swaps Enabled</div>
-                <Switch
-                  checked={fastSwaps}
-                  onCheckedChange={setFastSwaps}
-                  aria-label="Toggle Fast Swaps"
-                />
-              </div>
-
-              {/* Action button: Market = Deposit To Continue, Limit = Under Maintenance */}
               <button
                 type="button"
-                className={`inline-flex p-4 items-center justify-center whitespace-nowrap rounded-sm text-md ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 py-3 lg:text-xs text-wrap ${
+                className={cn(
+                  "inline-flex items-center justify-center whitespace-nowrap rounded-sm text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 w-full py-3 lg:text-xs text-wrap",
                   orderType === "market"
                     ? "bg-genius-green text-genius-indigo"
                     : "pointer-events-none bg-genius-yellow text-genius-indigo"
-                }`}
+                )}
                 disabled={orderType === "limit"}
               >
                 {orderType === "market" ? "Deposit To Continue" : "Under Maintenance"}
@@ -284,77 +343,26 @@ export function TradingControls() {
 
               {/* Presets */}
               <div className="flex items-center gap-2 border border-genius-blue rounded-sm p-1">
-                <button
-                  type="button"
-                  onClick={() => setSelectedPreset(1)}
-                  className={`flex-1 text-center text-xs rounded-sm py-1.5 cursor-pointer hover:opacity-80 transition-all uppercase ${
-                    selectedPreset === 1 ? "text-genius-cream bg-genius-blue" : "text-genius-cream/50"
-                  }`}
-                >
-                  Preset 1
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSelectedPreset(2)}
-                  className={`flex-1 text-center text-xs rounded-sm py-1.5 cursor-pointer hover:opacity-80 transition-all uppercase ${
-                    selectedPreset === 2 ? "text-genius-cream bg-genius-blue" : "text-genius-cream/50"
-                  }`}
-                >
-                  Preset 2
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSelectedPreset(3)}
-                  className={`flex-1 text-center text-xs rounded-sm py-1.5 cursor-pointer hover:opacity-80 transition-all uppercase ${
-                    selectedPreset === 3 ? "text-genius-cream bg-genius-blue" : "text-genius-cream/50"
-                  }`}
-                >
-                  Preset 3
-                </button>
+                {PRESETS.map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => setSelectedPreset(n)}
+                    className={cn(
+                      "flex-1 text-center text-xs rounded-sm py-1.5 cursor-pointer hover:opacity-80 transition-all uppercase",
+                      selectedPreset === n ? "text-genius-cream bg-genius-blue" : "text-genius-cream/50"
+                    )}
+                  >
+                    Preset {n}
+                  </button>
+                ))}
               </div>
 
               {/* Slippage % + Priority (Gwei) */}
               <div className="flex justify-between gap-2">
-                <div className="w-full flex flex-col border border-genius-blue rounded-sm">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={slippage}
-                      onChange={(e) => setSlippage(e.target.value)}
-                      className="flex w-full border p-3.5 ring-offset-background file:border-0 file:bg-transparent file:text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 py-1 border-none bg-genius-blue/40 text-center text-xs rounded-none border-b border-genius-blue"
-                    />
-                  </div>
-                  <div className="h-full flex justify-center items-center gap-1 py-1.5 px-2 text-[10px] uppercase leading-none opacity-50 text-genius-cream">
-                    <span className="size-2.5 flex shrink-0 [&>svg]:text-genius-cream">
-                      <SlippageIcon className="size-2.5" />
-                    </span>
-                    Slippage %
-                  </div>
-                </div>
-                <div className="w-full flex flex-col border border-genius-blue rounded-sm">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={priorityGwei}
-                      onChange={(e) => setPriorityGwei(e.target.value)}
-                      className="flex w-full border p-3.5 ring-offset-background file:border-0 file:bg-transparent file:text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 py-1 border-none bg-genius-blue/40 text-center text-xs rounded-none border-b border-genius-blue pr-8"
-                    />
-                    <div className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none">
-                      <Image
-                        src="https://www.tradegenius.com/static/geniusImages/advanced_network_logos/ethereum.png"
-                        alt="native"
-                        width={12}
-                        height={12}
-                        unoptimized
-                        className="object-contain"
-                      />
-                    </div>
-                  </div>
-                  <div className="h-full flex justify-center items-center gap-1 py-1.5 px-2 text-[10px] uppercase leading-none opacity-50 text-genius-cream">
-                    <Fuel className="size-2.5" aria-hidden />
-                    Priority (Gwei)
-                  </div>
-                </div>
+                {tradingFields.map((field) => (
+                  <TradingInputField key={field.label} {...field} />
+                ))}
               </div>
             </>
           )}

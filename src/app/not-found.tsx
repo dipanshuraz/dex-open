@@ -3,7 +3,7 @@ import { MoveLeft, Ghost } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-surface-dark text-white flex flex-col items-center justify-center px-4 font-sans relative overflow-hidden">
+    <div className="h-full bg-surface-dark text-white flex flex-col items-center justify-center px-4 font-sans relative overflow-hidden">
       {/* Background glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[120px]" />
@@ -16,7 +16,7 @@ export default function NotFound() {
 
         <div className="space-y-2">
           <h1 className="text-6xl font-black tracking-tighter text-white">404</h1>
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+          <h2 className="text-2xl font-bold bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
             Page Not Found
           </h2>
           <p className="text-gray-400 text-sm leading-relaxed">
@@ -34,8 +34,8 @@ export default function NotFound() {
       </div>
 
       {/* Decorative elements */}
-      <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      <div className="absolute bottom-0 left-0 w-full h-px bg-linear-to-r from-transparent via-white/10 to-transparent" />
+      <div className="absolute top-0 left-0 w-full h-px bg-linear-to-r from-transparent via-white/10 to-transparent" />
     </div>
   );
 }

@@ -11,6 +11,7 @@ import { StarIcon } from "@/components/icons/StarIcon";
 import { ClockIcon } from "@/components/icons/ClockIcon";
 import { Search, ClipboardList, ChevronDown } from "lucide-react";
 import { Switch } from "@/components/ui/Switch";
+import { cn } from "@/lib/utils";
 
 const HEADER_HEIGHT_COLLAPSED = "52px";
 const HEADER_HEIGHT_EXPANDED = "90px";
@@ -48,7 +49,7 @@ const Header = () => {
   }, [isTrendingCollapsed]);
 
   return (
-    <header className="z-[100] fixed top-0 left-0 right-0 flex flex-col bg-genius-indigo shrink-0">
+    <header className="z-100 fixed top-0 left-0 right-0 flex flex-col bg-genius-indigo shrink-0">
       <div className="flex justify-between items-center border-b border-genius-blue px-4 py-2.5">
         <div className="flex items-center gap-3 pl-2">
           <Link href="/">
@@ -110,7 +111,7 @@ const Header = () => {
         <div className="flex items-center gap-1.5">
           <button
             type="button"
-            className="md:hidden inline-flex items-center justify-center whitespace-nowrap rounded-sm text-md lg:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 bg-transparent p-2"
+            className="md:hidden inline-flex items-center justify-center whitespace-nowrap rounded-sm text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 bg-transparent p-2"
             aria-label="Search"
           >
             <Search className="w-[18px] h-[18px]" aria-hidden />
@@ -126,15 +127,16 @@ const Header = () => {
       </div>
 
       <div
-        className={`flex flex-col bg-genius-indigo overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out ${
+        className={cn(
+          "flex flex-col bg-genius-indigo overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out",
           isTrendingCollapsed
             ? "max-h-0 min-h-0 opacity-0 pointer-events-none"
             : "max-h-[500px] min-h-9 opacity-100"
-        }`}
+        )}
       >
-        <div className="h-full flex items-center border-b border-genius-blue min-h-9 w-full">
+        <div className="flex items-center border-b border-genius-blue min-h-9 w-full">
           <div className="flex items-center gap-2.5 pl-3 shrink-0">
-          <div className="group relative h-full">
+          <div className="group relative">
             <div className="hover:opacity-70 transition-opacity cursor-pointer text-genius-cream">
               <TrendingFlameIcon />
             </div>
@@ -143,7 +145,7 @@ const Header = () => {
                 <div className="text-xs">Trending</div>
                 <button
                   type="button"
-                  className="p-4 whitespace-nowrap lg:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 bg-transparent flex gap-2 border border-genius-blue items-center rounded-sm text-sm px-2 py-[4.5px] w-full justify-between"
+                  className="whitespace-nowrap lg:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 bg-transparent flex gap-2 border border-genius-blue items-center rounded-sm text-sm px-2 py-[4.5px] w-full justify-between"
                   onClick={() => setTrendingTimeframe((t) => (t === "24H" ? "7D" : t === "7D" ? "30D" : "24H"))}
                 >
                   <span>{trendingTimeframe}</span>
@@ -174,7 +176,7 @@ const Header = () => {
           <StarIcon />
           <ClockIcon />
         </div>
-        <div className="relative h-full w-[calc(100%-5rem)] flex items-center min-w-0 flex-1">
+        <div className="relative flex-1 min-w-0 flex items-center">
           <div className="absolute z-10 left-0 top-0 bottom-0 w-4 bg-linear-to-r from-genius-indigo to-transparent pointer-events-none" />
           <div className="absolute z-10 right-0 top-0 bottom-0 w-4 bg-linear-to-l from-genius-indigo to-transparent pointer-events-none" />
 
@@ -217,9 +219,10 @@ const Header = () => {
                       ${formatNumber(token.marketCap)}
                     </div>
                     <div
-                      className={`px-1 rounded-[2px] flex justify-center items-center gap-1 shrink-0 ${
+                      className={cn(
+                        "px-1 rounded-[2px] flex justify-center items-center gap-1 shrink-0",
                         isUp ? "bg-genius-green/20 text-genius-green" : "bg-genius-red/20 text-genius-red"
-                      }`}
+                      )}
                       style={{ width: 56 }}
                     >
                       <svg
@@ -227,7 +230,7 @@ const Header = () => {
                         fill="currentColor"
                         strokeWidth="0"
                         viewBox="0 0 512 512"
-                        className={`min-h-2 min-w-2 h-2 w-2 ${isUp ? "" : "rotate-180"}`}
+                        className={cn("min-h-2 min-w-2 h-2 w-2", !isUp && "rotate-180")}
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path d="M256 32 20 464h472L256 32z" />
@@ -261,9 +264,7 @@ const Header = () => {
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className={`w-3 h-3 text-genius-cream transition-transform duration-300 ${
-            isTrendingCollapsed ? "" : "rotate-180"
-          }`}
+          className={cn("w-3 h-3 text-genius-cream transition-transform duration-300", isTrendingCollapsed && "rotate-180")}
           aria-hidden
         >
           <path d="m18 15-6-6-6 6" />

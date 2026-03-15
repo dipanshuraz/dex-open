@@ -15,6 +15,7 @@ import { DexScreenerIcon } from "@/components/icons/DexScreenerIcon";
 import { LanguagesIcon } from "@/components/icons/LanguagesIcon";
 import { SearchSmallIcon } from "@/components/icons/SearchSmallIcon";
 import { SettingsCogIcon } from "@/components/icons/SettingsCogIcon";
+import { cn } from "@/lib/utils";
 
 export function TopBar({
   chainId,
@@ -170,35 +171,22 @@ export function TopBar({
 
             <div className="flex items-center gap-2 text-genius-cream/90">
               <div className="flex gap-2 items-center">
-                {twitterUrl && (
+                        {([
+                  { href: twitterUrl,     Icon: TwitterFillIcon, label: "Twitter",    rel: "noreferrer" },
+                  { href: primaryWebsite, Icon: EarthIcon,        label: "Website",    rel: "noreferrer" },
+                  { href: dexscreenerUrl, Icon: DexScreenerIcon,  label: "DexScreener" },
+                ] as const).filter((s) => s.href).map(({ href, Icon, label, rel }) => (
                   <a
+                    key={label}
                     className="rounded-md flex items-center justify-center text-xs bg-transparent size-3.5 text-genius-cream/90 hover:text-genius-cream hover:opacity-100 transition-opacity"
                     target="_blank"
-                    rel="noreferrer"
-                    href={twitterUrl}
+                    rel={rel}
+                    href={href!}
+                    aria-label={label}
                   >
-                    <TwitterFillIcon />
+                    <Icon />
                   </a>
-                )}
-                {primaryWebsite && (
-                  <a
-                    className="rounded-md flex items-center justify-center text-xs bg-transparent size-3.5 text-genius-cream/90 hover:text-genius-cream hover:opacity-100 transition-opacity"
-                    target="_blank"
-                    rel="noreferrer"
-                    href={primaryWebsite}
-                  >
-                    <EarthIcon />
-                  </a>
-                )}
-                {dexscreenerUrl && (
-                  <a
-                    className="rounded-md flex items-center justify-center text-xs bg-transparent size-3.5 text-genius-cream/90 hover:text-genius-cream hover:opacity-100 transition-opacity"
-                    target="_blank"
-                    href={dexscreenerUrl}
-                  >
-                    <DexScreenerIcon />
-                  </a>
-                )}
+                ))}
                 <LanguagesIcon />
               </div>
               <SearchSmallIcon />
@@ -209,21 +197,20 @@ export function TopBar({
         <div className="flex flex-col whitespace-nowrap shrink-0">
           <div className="flex flex-row items-center gap-2 min-w-[120px]">
             <span
-              className={`text-lg font-bold tracking-tight text-genius-cream transition-all duration-300 ${
-                priceFlash === "up"
-                  ? "shadow-flash-green scale-[1.03]"
-                  : priceFlash === "down"
-                  ? "shadow-flash-red scale-[1.03]"
-                  : ""
-              }`}
+              className={cn(
+                "text-lg font-bold tracking-tight text-genius-cream transition-all duration-300",
+                priceFlash === "up" && "shadow-flash-green scale-[1.03]",
+                priceFlash === "down" && "shadow-flash-red scale-[1.03]"
+              )}
             >
               {formatCurrency(currentPrice)}
             </span>
             <div className="items-center gap-1 text-xs">
               <div
-                className={`text-xs flex w-fit items-center gap-1 px-0.5 py-0 rounded-sm ${
+                className={cn(
+                  "text-xs flex w-fit items-center gap-1 px-0.5 py-0 rounded-sm",
                   isPositive ? "text-genius-green bg-genius-green/20" : "text-genius-red bg-genius-red/20"
-                }`}
+                )}
               >
                 <svg
                   stroke="currentColor"
@@ -241,51 +228,30 @@ export function TopBar({
           </div>
         </div>
 
-        <div className="flex flex-col whitespace-nowrap shrink-0">
-          <div className="text-genius-cream/65 text-xs whitespace-nowrap">Volume</div>
-          <div className="text-genius-cream text-sm min-w-0 truncate max-w-[80px]" title={formatNumber(metadata.volume?.h24 ?? 0)}>
-            ${formatNumber(metadata.volume?.h24 ?? 0)}
+        {([
+          { label: "Volume",       value: `$${formatNumber(metadata.volume?.h24 ?? 0)}`,                     title: formatNumber(metadata.volume?.h24 ?? 0) },
+          { label: "M.Cap",        value: `$${formatNumber(metadata.marketCap ?? metadata.fdv ?? 0)}`,        title: formatNumber(metadata.marketCap ?? metadata.fdv ?? 0) },
+          { label: "Liquidity",    value: `$${formatNumber(metadata.liquidity?.usd ?? 0)}`,                   title: formatNumber(metadata.liquidity?.usd ?? 0) },
+          { label: "Holders",      value: holdersCount != null ? holdersCount.toLocaleString() : "—" },
+          { label: "Age",          value: ageStr },
+          { label: "Supply",       value: totalSupply != null ? formatNumber(totalSupply) : "—" },
+          {
+            label: "Buy Pressure",
+            value: `${buyPressurePositive ? "+" : ""}${buyPressureDelta.toFixed(1)}%`,
+            title: `${buyPressure.toFixed(1)}%`,
+            valueClassName: buyPressurePositive ? "text-genius-green" : "text-genius-red",
+          },
+        ] as const).map(({ label, value, title, valueClassName }) => (
+          <div key={label} className="flex flex-col whitespace-nowrap shrink-0">
+            <div className="text-genius-cream/65 text-xs whitespace-nowrap">{label}</div>
+            <div
+              className={cn("text-genius-cream text-sm min-w-0 truncate max-w-[80px]", valueClassName)}
+              title={title}
+            >
+              {value}
+            </div>
           </div>
-        </div>
-        <div className="flex flex-col whitespace-nowrap shrink-0">
-          <div className="text-genius-cream/65 text-xs whitespace-nowrap">M.Cap</div>
-          <div className="text-genius-cream text-sm min-w-0 truncate max-w-[72px]" title={formatNumber(metadata.marketCap ?? metadata.fdv ?? 0)}>
-            ${formatNumber(metadata.marketCap ?? metadata.fdv ?? 0)}
-          </div>
-        </div>
-        <div className="flex flex-col whitespace-nowrap shrink-0">
-          <div className="text-genius-cream/65 text-xs whitespace-nowrap">Liquidity</div>
-          <div className="text-genius-cream text-sm min-w-0 truncate max-w-[72px]" title={formatNumber(metadata.liquidity?.usd ?? 0)}>
-            ${formatNumber(metadata.liquidity?.usd ?? 0)}
-          </div>
-        </div>
-        <div className="flex flex-col whitespace-nowrap shrink-0">
-          <div className="text-genius-cream/65 text-xs whitespace-nowrap">Holders</div>
-          <div className="text-genius-cream text-sm min-w-0 truncate max-w-[64px]">
-            {holdersCount != null ? holdersCount.toLocaleString() : "—"}
-          </div>
-        </div>
-        <div className="flex flex-col whitespace-nowrap shrink-0">
-          <div className="text-genius-cream/65 text-xs whitespace-nowrap">Age</div>
-          <div className="text-genius-cream text-sm min-w-0 truncate max-w-[88px]">
-            {ageStr}
-          </div>
-        </div>
-        <div className="flex flex-col whitespace-nowrap shrink-0">
-          <div className="text-genius-cream/65 text-xs whitespace-nowrap">Supply</div>
-          <div className="text-genius-cream text-sm min-w-0 truncate max-w-[56px]">
-            {totalSupply != null ? formatNumber(totalSupply) : "—"}
-          </div>
-        </div>
-        <div className="flex flex-col whitespace-nowrap shrink-0">
-          <div className="text-genius-cream/65 text-xs whitespace-nowrap">Buy Pressure</div>
-          <div
-            className={`text-sm min-w-0 truncate max-w-[72px] ${buyPressurePositive ? "text-genius-green" : "text-genius-red"}`}
-            title={`${buyPressure.toFixed(1)}%`}
-          >
-            {buyPressurePositive ? "+" : ""}{buyPressureDelta.toFixed(1)}%
-          </div>
-        </div>
+        ))}
 
         <button
           type="button"

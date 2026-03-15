@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Crosshair,
   Flame,
@@ -8,7 +8,7 @@ import {
   ExternalLink,
   ChevronDown,
 } from "lucide-react";
-import { truncateAddress } from "@/lib/utils";
+import { cn, truncateAddress } from "@/lib/utils";
 import { useHolders } from "@/hooks/useHolders";
 import { useTokenProfile } from "@/hooks/useTokenProfile";
 
@@ -163,12 +163,34 @@ function InfoCard({
   className?: string;
 }) {
   return (
-    <div className={`h-14 flex flex-col justify-center items-center bg-genius-indigo border border-genius-blue rounded-sm p-1.5 min-h-0 ${className}`.trim()}>
-      <div className={`flex items-center gap-1.5 text-sm ${valueClassName}`}>
+    <div className={cn("h-14 flex flex-col justify-center items-center bg-genius-indigo border border-genius-blue rounded-sm p-1.5 min-h-0", className)}>
+      <div className={cn("flex items-center gap-1.5 text-sm", valueClassName)}>
         <Icon className="size-3.5 shrink-0" />
         <div>{value}</div>
       </div>
       <div className="text-[10px] text-genius-cream/50 uppercase">{label}</div>
+    </div>
+  );
+}
+
+function AddressRow({
+  prefix,
+  Icon,
+  address,
+  actions,
+}: {
+  prefix: string;
+  Icon: React.ComponentType<{ className?: string }>;
+  address: string;
+  actions: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between px-3 py-2 border border-genius-blue rounded-sm hover:opacity-70 transition-opacity cursor-pointer">
+      <div className="flex items-center gap-1 text-xs">
+        <Icon className="w-3.5 h-3.5 opacity-50 shrink-0" />
+        <span className="opacity-50">{prefix}:</span> {address}
+      </div>
+      {actions}
     </div>
   );
 }
@@ -202,7 +224,7 @@ export function TokenStats({
       >
         Token Info
         <ChevronDown
-          className={`w-3.5 h-3.5 transition-transform shrink-0 ${isExpanded ? "" : "-rotate-90"}`}
+          className={cn("w-3.5 h-3.5 transition-transform shrink-0", !isExpanded && "-rotate-90")}
           aria-hidden
         />
       </button>
@@ -213,7 +235,7 @@ export function TokenStats({
           data-sentry-component="AdvancedOverviewTokenInfo"
           data-sentry-source-file="AdvancedOverviewTokenInfo.tsx"
         >
-          <div className="grid grid-cols-6 gap-3 text-sm border-l-0">
+          <div className="grid grid-cols-6 gap-3 text-sm">
             <InfoCard
               icon={UserStarIcon}
               value={top10Pct}
@@ -241,35 +263,31 @@ export function TokenStats({
             <InfoCard icon={Flame} value="-" label="LP BURNED" className="col-span-3" />
           </div>
 
-          <div className="flex items-center justify-between px-3 py-2 border border-genius-blue rounded-sm hover:opacity-70 transition-opacity cursor-pointer">
-            <div className="flex items-center gap-1 text-xs">
-              <FileText className="w-3.5 h-3.5 opacity-50 shrink-0" aria-hidden />
-              <span className="opacity-50">CA:</span> {truncateAddress(tokenAddress)}
-            </div>
-            <ExternalLink
-              className="w-3.5 h-3.5 opacity-50 hover:opacity-70 transition-opacity shrink-0"
-              aria-hidden
-            />
-          </div>
+          <AddressRow
+            prefix="CA"
+            Icon={FileText}
+            address={truncateAddress(tokenAddress)}
+            actions={
+              <ExternalLink className="w-3.5 h-3.5 opacity-50 hover:opacity-70 transition-opacity shrink-0" aria-hidden />
+            }
+          />
 
-          <div className="flex items-center justify-between px-3 py-2 border border-genius-blue rounded-sm hover:opacity-70 transition-opacity cursor-pointer">
-            <div className="flex items-center gap-1 text-xs">
-              <ChefHatIcon className="size-3.5 opacity-50 shrink-0" />
-              <span className="opacity-50">DA:</span> {truncateAddress(tokenAddress)}
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="relative shrink-0">
-                <ChefHatIcon className="size-3.5 text-genius-cream/50 hover:opacity-70 transition-opacity cursor-pointer" />
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center z-10">
-                  <SlashIcon className="h-3.5 w-3.5 text-genius-cream/50" />
+          <AddressRow
+            prefix="DA"
+            Icon={ChefHatIcon}
+            address={truncateAddress(tokenAddress)}
+            actions={
+              <div className="flex items-center gap-2">
+                <div className="relative shrink-0">
+                  <ChefHatIcon className="size-3.5 text-genius-cream/50 hover:opacity-70 transition-opacity cursor-pointer" />
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center z-10">
+                    <SlashIcon className="h-3.5 w-3.5 text-genius-cream/50" />
+                  </div>
                 </div>
+                <ExternalLink className="w-3.5 h-3.5 opacity-50 hover:opacity-70 transition-opacity shrink-0" aria-hidden />
               </div>
-              <ExternalLink
-                className="w-3.5 h-3.5 opacity-50 hover:opacity-70 transition-opacity shrink-0"
-                aria-hidden
-              />
-            </div>
-          </div>
+            }
+          />
 
           {profile && (
             <div className="p-3 border border-genius-blue rounded-sm bg-genius-indigo flex flex-col gap-1.5">

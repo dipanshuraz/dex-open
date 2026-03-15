@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import type { TimeframeItem, TimeframeKey, TokenStatsData } from "@/types";
 
 type AdvancedPanelTokenStatsProps = {
@@ -44,7 +45,7 @@ export function AdvancedPanelTokenStats({
           <div className="flex flex-col gap-0.5 items-end">
             <div className="text-[10px] text-genius-cream/60 uppercase">Vol. Change</div>
             <div
-              className={`text-xs ${stats.volChangePositive ? "text-genius-green" : "text-genius-red"}`}
+              className={cn("text-xs", stats.volChangePositive ? "text-genius-green" : "text-genius-red")}
             >
               {stats.volChange}
             </div>
@@ -73,18 +74,16 @@ export function AdvancedPanelTokenStats({
               key={tf.key}
               type="button"
               onClick={() => onTimeframeSelect?.(tf.key)}
-              className={`
-                flex flex-col justify-center items-center p-1 min-h-0 cursor-pointer
-                transition-colors duration-150
-                ${tf.active
+              className={cn(
+                "flex flex-col justify-center items-center p-1 min-h-0 cursor-pointer transition-colors duration-150",
+                tf.active
                   ? "bg-genius-blue text-genius-cream ring-inset ring-1 ring-genius-cream/20"
                   : "bg-genius-indigo text-genius-cream/80 hover:bg-genius-blue/40 hover:text-genius-cream"
-                }
-              `}
+              )}
             >
               <div className="text-[10px] uppercase">{tf.label}</div>
               <div
-                className={`text-xs ${tf.positive ? "text-genius-green" : "text-genius-red"}`}
+                className={cn("text-xs", tf.positive ? "text-genius-green" : "text-genius-red")}
               >
                 {tf.value}
               </div>

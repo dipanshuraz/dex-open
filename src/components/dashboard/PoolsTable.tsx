@@ -10,6 +10,52 @@ import { CopyIcon } from "@/components/icons/CopyIcon";
 import { ExternalLink } from "lucide-react";
 import { TableEmptyState } from "./TableEmptyState";
 
+const POOLS_COLUMNS = [
+  "Pool",
+  "Pair",
+  "Price/Mark Price Diff",
+  "Backing Asset Liquidity",
+  "Volume (24h)",
+  "Age",
+  "Buy / Sell",
+] as const;
+
+function CopyAndLinkActions({
+  copyValue,
+  href,
+  copyTitle,
+  linkLabel,
+  copyClassName,
+}: {
+  copyValue: string;
+  href: string;
+  copyTitle: string;
+  linkLabel: string;
+  copyClassName?: string;
+}) {
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => navigator.clipboard.writeText(copyValue)}
+        className={`text-genius-cream/50 hover:text-genius-cream transition-colors ${copyClassName ?? ""}`}
+        title={copyTitle}
+      >
+        <CopyIcon className="w-3 h-3" />
+      </button>
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-genius-cream/50 hover:text-genius-cream transition-colors"
+        aria-label={linkLabel}
+      >
+        <ExternalLink className="w-3 h-3" strokeWidth={2} />
+      </a>
+    </>
+  );
+}
+
 function PoolRow({ pool, now }: { pool: Pool; now: number }) {
   const seconds = Math.floor((now - pool.age) / 1000);
   let ageStr;
@@ -43,44 +89,23 @@ function PoolRow({ pool, now }: { pool: Pool; now: number }) {
       <div className="flex items-center gap-2 truncate w-full text-left">
         <span className="text-lg">{dexIcon}</span>
         <span>{dexName}</span>
-        <button
-          type="button"
-          onClick={() => navigator.clipboard.writeText(pool.pairAddress)}
-          className="ml-1 text-genius-cream/50 hover:text-genius-cream transition-colors"
-          title="Copy pool address"
-        >
-          <CopyIcon className="w-3 h-3" />
-        </button>
-        <a
+        <CopyAndLinkActions
+          copyValue={pool.pairAddress}
           href={pool.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-genius-cream/50 hover:text-genius-cream transition-colors"
-          aria-label="Open pool in explorer"
-        >
-          <ExternalLink className="w-3 h-3" strokeWidth={2} />
-        </a>
+          copyTitle="Copy pool address"
+          linkLabel="Open pool in explorer"
+          copyClassName="ml-1"
+        />
       </div>
 
       <div className="flex items-center gap-2 truncate w-full text-left">
         <span>{pool.pair}</span>
-        <button
-          type="button"
-          onClick={() => navigator.clipboard.writeText(pool.pairAddress)}
-          className="text-genius-cream/50 hover:text-genius-cream transition-colors"
-          title="Copy pair address"
-        >
-          <CopyIcon className="w-3 h-3" />
-        </button>
-        <a
+        <CopyAndLinkActions
+          copyValue={pool.pairAddress}
           href={pool.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-genius-cream/50 hover:text-genius-cream transition-colors"
-          aria-label="Open pair in explorer"
-        >
-          <ExternalLink className="w-3 h-3" strokeWidth={2} />
-        </a>
+          copyTitle="Copy pair address"
+          linkLabel="Open pair in explorer"
+        />
       </div>
 
       <div className="truncate w-full text-left text-genius-cream/60">
@@ -118,17 +143,13 @@ export function PoolsTable({
 
   return (
     <div className="absolute inset-0 flex flex-col font-sans bg-genius-indigo text-genius-cream">
-      <header className="sticky top-0 z-10 w-full shrink-0">
+      <div className="sticky top-0 z-10 w-full shrink-0">
         <div className="grid grid-cols-7 w-full px-5 py-1.5 bg-genius-blue/50 items-center gap-2">
-          <div className="text-genius-cream/60 whitespace-nowrap text-xs">Pool</div>
-          <div className="text-genius-cream/60 whitespace-nowrap text-xs">Pair</div>
-          <div className="text-genius-cream/60 whitespace-nowrap text-xs">Price/Mark Price Diff</div>
-          <div className="text-genius-cream/60 whitespace-nowrap text-xs">Backing Asset Liquidity</div>
-          <div className="text-genius-cream/60 whitespace-nowrap text-xs">Volume (24h)</div>
-          <div className="text-genius-cream/60 whitespace-nowrap text-xs">Age</div>
-          <div className="text-genius-cream/60 whitespace-nowrap text-xs">Buy / Sell</div>
+          {POOLS_COLUMNS.map((col) => (
+            <div key={col} className="text-genius-cream/60 whitespace-nowrap text-xs">{col}</div>
+          ))}
         </div>
-      </header>
+      </div>
 
       <div className="flex-1 overflow-y-auto custom-scrollbar relative">
         {loading && pools.length === 0 ? (

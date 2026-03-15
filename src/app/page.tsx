@@ -1,11 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, TrendingUp, Zap, Shield } from "lucide-react";
 
 import { CHAINS } from "@/lib/config";
 import { LANDING_EXAMPLES, LANDING_FEATURES } from "@/dummy/landing";
+
+const ICON_MAP: Record<string, React.ReactNode> = {
+  dot:      <div className="w-1.5 h-1.5 rounded-full bg-genius-green" />,
+  shield:   <Shield className="w-3 h-3" />,
+  trending: <TrendingUp className="w-3 h-3" />,
+};
 
 export default function Home() {
   const router = useRouter();
@@ -25,18 +31,18 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-dark text-white flex flex-col items-center justify-center px-4 font-sans">
+    <div className="h-full bg-surface-dark text-white flex flex-col items-center justify-center px-4 font-sans">
 
       <div className="relative z-10 flex flex-col items-center gap-8 w-full max-w-2xl">
 
         {/* Logo / Title */}
         <div className="flex flex-col items-center gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center shadow-lg shadow-purple-500/30">
+            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-purple-600 to-blue-600 flex items-center justify-center shadow-lg shadow-purple-500/30">
               <TrendingUp className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              Web3 <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Dashboard</span>
+              <h1 className="text-3xl font-bold tracking-tight">
+              Web3 <span className="bg-linear-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Dashboard</span>
             </h1>
           </div>
           <p className="text-gray-400 text-sm text-center">
@@ -84,7 +90,7 @@ export default function Home() {
 
           <button
             type="submit"
-            className="w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2"
+            className="w-full h-12 bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2"
           >
             <Zap className="w-4 h-4" />
             Open Dashboard
@@ -111,9 +117,7 @@ export default function Home() {
         <div className="flex items-center gap-6 text-[11px] text-gray-600">
           {LANDING_FEATURES.map((f) => (
             <span key={f.label} className="flex items-center gap-1.5">
-              {f.icon === "dot" && <div className="w-1.5 h-1.5 rounded-full bg-genius-green" />}
-              {f.icon === "shield" && <Shield className="w-3 h-3" />}
-              {f.icon === "trending" && <TrendingUp className="w-3 h-3" />}
+              {ICON_MAP[f.icon]}
               {f.label}
             </span>
           ))}

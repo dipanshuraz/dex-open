@@ -4,6 +4,7 @@ import { useHolders, Holder } from "@/hooks/useHolders";
 import { formatCurrency, formatNumber, truncateAddress } from "@/lib/utils";
 import { useCallback } from "react";
 import { TableEmptyState } from "./TableEmptyState";
+import { cn } from "@/lib/utils";
 
 export function HoldersTable({
   chainId,
@@ -22,14 +23,21 @@ export function HoldersTable({
 
   return (
     <div className="w-full flex-1 flex flex-col font-sans h-full bg-genius-indigo text-genius-cream">
-      <header className="sticky top-0 z-10 w-full shrink-0">
+      <div className="sticky top-0 z-10 w-full shrink-0">
         <div className="grid grid-cols-[1fr_60px_2fr_100px] w-full px-5 py-1.5 bg-genius-blue/50 items-center gap-2">
-          <div className="text-genius-cream/60 whitespace-nowrap text-xs">Holders</div>
-          <div className="text-genius-cream/60 whitespace-nowrap text-xs text-right">%</div>
-          <div className="text-genius-cream/60 whitespace-nowrap text-xs text-right">Amount</div>
-          <div className="text-genius-cream/60 whitespace-nowrap text-xs text-right">Value</div>
+          {(["Holders", "%", "Amount", "Value"] as const).map((label) => (
+            <div
+              key={label}
+              className={cn(
+                "text-genius-cream/60 whitespace-nowrap text-xs",
+                label !== "Holders" && "text-right"
+              )}
+            >
+              {label}
+            </div>
+          ))}
         </div>
-      </header>
+      </div>
 
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         {loading && holders.length === 0 && (
@@ -86,13 +94,10 @@ export function HoldersTable({
                       return (
                         <div
                           key={idx}
-                          className={`h-full rounded-[1px] ${
-                            filled
-                              ? isPink
-                                ? "bg-genius-pink"
-                                : "bg-genius-blue"
-                              : "bg-genius-indigo"
-                          }`}
+                          className={cn(
+                            "h-full rounded-[1px]",
+                            filled ? (isPink ? "bg-genius-pink" : "bg-genius-blue") : "bg-genius-indigo"
+                          )}
                           style={{ width: 1 }}
                         />
                       );

@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 import { TradesTable } from "./TradesTable";
 import { HoldersTable } from "./HoldersTable";
 import { PoolsTable } from "./PoolsTable";
 import { TableEmptyState } from "./TableEmptyState";
-import { PanelRightClose, Zap, ListFilter, ArrowUpDown, ChevronDown } from "lucide-react";
+import { PanelRightClose, Zap, ListFilter, ArrowUpDown, ChevronDown, type LucideIcon } from "lucide-react";
 import { Switch } from "@/components/ui/Switch";
 
 type Tab =
@@ -28,6 +29,23 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "history", label: "History" },
   { key: "exited", label: "Exited" },
 ];
+
+const TOOLBAR_BTN_BASE = "inline-flex items-center justify-center whitespace-nowrap rounded-sm text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 border border-genius-blue gap-1.5 py-1 px-2 lg:text-xs text-genius-cream";
+
+type ToolbarAction = {
+  label: string;
+  Icon: LucideIcon;
+  onClick?: () => void;
+};
+
+function ToolbarButton({ label, Icon, onClick }: ToolbarAction) {
+  return (
+    <button type="button" className={TOOLBAR_BTN_BASE} onClick={onClick}>
+      {label}
+      <Icon className="w-3.5 h-3.5" aria-hidden />
+    </button>
+  );
+}
 
 const POSITION_HEADERS = [
   { label: "Ticker", sortable: true },
@@ -77,11 +95,12 @@ export function TabbedPanel({
                 key={tab.key}
                 type="button"
                 onClick={() => setActiveTab(tab.key)}
-                className={`cursor-pointer transition-colors rounded-sm px-2 py-0.5 text-sm whitespace-nowrap shrink-0 ${
+                className={cn(
+                  "cursor-pointer transition-colors rounded-sm px-2 py-0.5 text-sm whitespace-nowrap shrink-0",
                   isActive
                     ? "text-genius-cream bg-genius-blue"
-                    : "text-genius-cream/60 bg-transparent hover:bg-genius-blue hover:text-genius-cream"
-                }`}
+                    : "text-genius-cream/60 hover:bg-genius-blue hover:text-genius-cream"
+                )}
               >
                 {tab.label}
               </button>
@@ -93,14 +112,7 @@ export function TabbedPanel({
           <div className="absolute top-0 left-0 w-3 h-full bg-linear-to-r from-genius-indigo to-transparent z-10 pointer-events-none" />
           <div className="absolute top-0 right-0 w-3 h-full bg-linear-to-l from-genius-indigo to-transparent z-10 pointer-events-none" />
           <div className="flex items-center gap-3 overflow-x-auto px-3 scrollbar-hide py-1">
-            <button
-              type="button"
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-sm text-md ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 border border-genius-blue gap-1.5 py-[3px] px-2 lg:text-xs text-genius-cream"
-              onClick={() => setPanelVisible((v) => !v)}
-            >
-              Trades Panel
-              <PanelRightClose className="w-3.5 h-3.5" aria-hidden />
-            </button>
+            <ToolbarButton label="Trades Panel" Icon={PanelRightClose} onClick={() => setPanelVisible((v) => !v)} />
 
             <div className="flex flex-row items-center gap-1.5">
               <span className="text-xs text-genius-cream cursor-pointer hover:text-genius-cream/80 transition-colors select-none whitespace-nowrap">
@@ -113,17 +125,11 @@ export function TabbedPanel({
               />
             </div>
 
-            <button
-              type="button"
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-sm text-md ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 border border-genius-blue gap-1.5 py-[3px] px-2 lg:text-xs text-genius-cream"
-            >
-              Filter
-              <ListFilter className="w-3.5 h-3.5" aria-hidden />
-            </button>
+            <ToolbarButton label="Filter" Icon={ListFilter} />
 
             <button
               type="button"
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-sm text-md ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 gap-1.5 py-1 px-2 lg:text-xs bg-genius-pink/20 text-genius-pink"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-sm text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:brightness-50 transition-all lg:hover:brightness-75 gap-1.5 py-1 px-2 lg:text-xs bg-genius-pink/20 text-genius-pink"
             >
               <Zap className="w-3.5 h-3.5" aria-hidden />
               Instant Trade
@@ -133,12 +139,15 @@ export function TabbedPanel({
       </div>
 
       {showEmptyState && (
-        <header className="sticky top-0 z-10 w-full shrink-0">
+        <div className="sticky top-0 z-10 w-full shrink-0">
           <div className="grid grid-cols-[1fr_1fr_0.8fr_1fr_0.8fr_1fr_1fr_auto] w-full px-5 py-1.5 bg-genius-blue/50 items-center gap-2">
             {POSITION_HEADERS.map((h) => (
               <div
                 key={h.label}
-                className={`text-genius-cream/60 whitespace-nowrap text-xs flex items-center gap-1 ${h.sortable ? "cursor-pointer hover:opacity-70 transition-opacity" : ""}`}
+                className={cn(
+                  "text-genius-cream/60 whitespace-nowrap text-xs flex items-center gap-1",
+                  h.sortable && "cursor-pointer hover:opacity-70 transition-opacity"
+                )}
               >
                 {h.label}
                 {h.sortable && <ArrowUpDown className="w-3 h-3 shrink-0" aria-hidden />}
@@ -152,7 +161,7 @@ export function TabbedPanel({
               <ChevronDown className="w-3.5 h-3.5" aria-hidden />
             </button>
           </div>
-        </header>
+        </div>
       )}
 
       <div className="flex-1 overflow-hidden relative min-h-0">

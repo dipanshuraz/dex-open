@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { ExternalLink, Loader2, Funnel, ArrowRightLeft } from "lucide-react";
 import { TableEmptyState } from "./TableEmptyState";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { cn } from "@/lib/utils";
 
 const TRADES_COLUMNS = [
   { key: "time", label: "Time", sortable: true, align: "left" as const },
@@ -59,14 +60,12 @@ function TradesTableHeader({
   onAgeColumnModeToggle: () => void;
   onPriceColumnModeToggle: () => void;
 }) {
+  const TOGGLE_LABEL_BTN = "w-fit flex items-center gap-1 cursor-pointer hover:opacity-70 transition-opacity";
+
   const renderLabel = (col: (typeof TRADES_COLUMNS)[number]) => {
     if (col.key === "time") {
       return (
-        <button
-          type="button"
-          onClick={onAgeColumnModeToggle}
-          className="w-fit flex items-center gap-1 cursor-pointer hover:opacity-70 transition-opacity"
-        >
+        <button type="button" onClick={onAgeColumnModeToggle} className={TOGGLE_LABEL_BTN}>
           {ageColumnMode === "age" ? "Age" : "Time"}
           <ArrowRightLeft className="w-3 h-3 shrink-0" strokeWidth={2} aria-hidden />
         </button>
@@ -74,11 +73,7 @@ function TradesTableHeader({
     }
     if (col.key === "price") {
       return (
-        <button
-          type="button"
-          onClick={onPriceColumnModeToggle}
-          className="w-fit flex items-center gap-1 cursor-pointer hover:opacity-70 transition-opacity"
-        >
+        <button type="button" onClick={onPriceColumnModeToggle} className={TOGGLE_LABEL_BTN}>
           {priceColumnMode === "price" ? "Price" : "M.Cap"}
           <ArrowRightLeft className="w-3 h-3 shrink-0" strokeWidth={2} aria-hidden />
         </button>
@@ -86,7 +81,7 @@ function TradesTableHeader({
     }
     if (col.key === "totalUsd") {
       return (
-        <div className="w-fit flex items-center gap-1 cursor-pointer hover:opacity-70 transition-opacity">
+        <div className={TOGGLE_LABEL_BTN}>
           Total USD
           <ArrowRightLeft className="w-3 h-3 shrink-0" strokeWidth={2} aria-hidden />
         </div>
@@ -135,11 +130,7 @@ function TradeRow({
   const gradientPct =
     maxTotalUsd > 0 ? Math.min(100, (trade.total / maxTotalUsd) * 100) : 0;
 
-  const flashBg = trade.isNew
-    ? isBuy
-      ? "bg-genius-green/15"
-      : "bg-genius-red/15"
-    : "bg-transparent";
+  const flashBg = trade.isNew ? (isBuy ? "bg-genius-green/15" : "bg-genius-red/15") : null;
 
   const timeLabel =
     ageColumnMode === "age" ? ageStr(now, trade.timestamp) : timeStr(trade.timestamp);
@@ -156,20 +147,22 @@ function TradeRow({
       initial={{ opacity: 0, y: -6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className={`relative grid grid-cols-6 w-full px-5 py-2.5 h-[38px] items-center transition-colors hover:bg-genius-blue cursor-pointer overflow-hidden ${
-        trade.isNew ? flashBg : ""
-      }`}
+      className={cn(
+        "relative grid grid-cols-6 w-full px-5 py-2.5 h-[38px] items-center transition-colors hover:bg-genius-blue cursor-pointer overflow-hidden",
+        flashBg
+      )}
     >
       <div className="min-w-0 flex flex-col relative z-10">
         <span className="text-sm text-genius-cream/80 truncate">{timeLabel}</span>
       </div>
       <div className="min-w-0 flex flex-col relative z-10">
-        <span className={`text-sm ${typeColor}`}>
+        <span className={cn("text-sm", typeColor)}>
           {trade.isNew && (
             <span
-              className={`inline-block w-1.5 h-1.5 rounded-full animate-ping mr-1 ${
+              className={cn(
+                "inline-block w-1.5 h-1.5 rounded-full animate-ping mr-1",
                 isBuy ? "bg-genius-green" : "bg-genius-red"
-              }`}
+              )}
             />
           )}
           {trade.type === "BUY" ? "Buy" : "Sell"}
@@ -192,7 +185,7 @@ function TradeRow({
                 : "linear-gradient(to right, hsl(var(--genius-red) / 0), hsl(var(--genius-red) / 0.3))",
             }}
           />
-          <span className={`text-sm relative z-10 ${typeColor}`}>${formatNumber(trade.total)}</span>
+          <span className={cn("text-sm relative z-10", typeColor)}>${formatNumber(trade.total)}</span>
         </div>
       </div>
       <div className="flex flex-col relative z-10 items-end justify-center">
@@ -305,14 +298,14 @@ export function TradesTable({
 
   return (
     <div className="flex flex-col h-full min-h-0 w-full font-sans bg-genius-indigo text-genius-cream">
-      <header className="sticky top-0 z-10 w-full shrink-0">
+      <div className="sticky top-0 z-10 w-full shrink-0">
         <TradesTableHeader
           ageColumnMode={ageColumnMode}
           priceColumnMode={priceColumnMode}
           onAgeColumnModeToggle={() => setAgeColumnMode((m) => (m === "age" ? "time" : "age"))}
           onPriceColumnModeToggle={() => setPriceColumnMode((m) => (m === "price" ? "mcap" : "price"))}
         />
-      </header>
+      </div>
 
       <div ref={setScrollRef} className="flex-1 overflow-y-auto custom-scrollbar relative">
         {error && !loading && (

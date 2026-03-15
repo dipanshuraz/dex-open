@@ -17,26 +17,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className="antialiased h-screen overflow-hidden text-white"
-      >
+      <body className="antialiased text-white">
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
           enableSystem={false}
           disableTransitionOnChange
         >
-          <div className="dark">
-            <QueryProvider>
-              <div className="flex flex-col h-screen overflow-hidden bg-background">
-                <Header />
-                <main className="flex-1 min-h-0 pt-[var(--navbar-height)] pb-14 text-white overflow-hidden transition-[padding-top] duration-300 ease-in-out">
-                  {children}
-                </main>
-                <Footer />
-              </div>
-            </QueryProvider>
-          </div>
+          <QueryProvider>
+            <div className="flex flex-col h-screen overflow-hidden bg-background">
+              <Header />
+                <main className="flex-1 min-h-0 pt-(--navbar-height) pb-14 text-white overflow-hidden transition-[padding-top] duration-300 ease-in-out">
+                {children}
+              </main>
+              <Footer />
+            </div>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>
